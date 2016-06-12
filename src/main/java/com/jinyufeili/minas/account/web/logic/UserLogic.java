@@ -79,7 +79,7 @@ public class UserLogic {
         userService.update(user);
 
         boolean residentUserIdChanged = false;
-        if (vo.getResident().getId() == 0) {
+        if (vo.getResident() != null && vo.getResident().getId() == 0 && vo.getRoom() != null && vo.getRoom().getId() > 0) {
             residentUserIdChanged = true;
             Resident resident = new Resident();
             resident.setName(vo.getResident().getName());
@@ -87,7 +87,7 @@ public class UserLogic {
             resident.setRoomId(vo.getRoom().getId());
             resident.setUserId(userId);
             residentService.create(resident);
-        } else {
+        } else if (vo.getResident() != null && vo.getResident().getId() > 0){
             Resident resident = residentService.get(vo.getResident().getId());
             residentUserIdChanged = resident.getUserId() == 0;
             resident.setName(vo.getResident().getName());
