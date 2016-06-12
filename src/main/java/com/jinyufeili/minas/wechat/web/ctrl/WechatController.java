@@ -4,6 +4,7 @@ import com.jinyufeili.minas.account.data.User;
 import com.jinyufeili.minas.account.service.UserService;
 import com.jinyufeili.minas.web.exception.BadRequestException;
 import com.jinyufeili.minas.wechat.web.logic.WechatLogic;
+import me.chanjar.weixin.common.api.WxConsts;
 import me.chanjar.weixin.common.bean.WxJsapiSignature;
 import me.chanjar.weixin.common.exception.WxErrorException;
 import me.chanjar.weixin.common.util.StringUtils;
@@ -100,7 +101,7 @@ public class WechatController {
     @RequestMapping("/api/wechat/oauth2-callback")
     public void wechatLoginCallback(HttpServletRequest request, HttpServletResponse response,
                                     Authentication authentication, @RequestParam String callback,
-                                    @RequestParam String code) throws IOException, WxErrorException {
+                                    @RequestParam String code, @RequestParam(defaultValue = "") String state) throws IOException, WxErrorException {
         if (authentication != null && authentication.isAuthenticated()) {
             rememberMeServices.logout(request, response, authentication);
         }
@@ -111,6 +112,10 @@ public class WechatController {
                 userDetails.getAuthorities());
         rememberMeServices.loginSuccess(request, response, authenticationToken);
         response.sendRedirect(callback);
+
+        if (WxConsts.EVT_SUBSCRIBE.equals(state)) {
+            wechatLogic.sendNotifyToAdmin(user);
+        }
     }
 
     @RequestMapping("/api/wechat/js_signature")

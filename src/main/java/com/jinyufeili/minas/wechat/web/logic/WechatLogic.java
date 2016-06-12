@@ -5,16 +5,18 @@ import com.jinyufeili.minas.account.service.UserService;
 import com.jinyufeili.minas.web.exception.BadRequestException;
 import me.chanjar.weixin.common.exception.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpService;
+import me.chanjar.weixin.mp.bean.WxMpTemplateData;
+import me.chanjar.weixin.mp.bean.WxMpTemplateMessage;
 import me.chanjar.weixin.mp.bean.result.WxMpOAuth2AccessToken;
 import me.chanjar.weixin.mp.bean.result.WxMpUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Date;
 
 /**
  * Created by pw on 6/10/16.
@@ -27,6 +29,8 @@ public class WechatLogic {
     public static final String ALLOWED_PROTOCOL = "https";
 
     public static final String ALLOWED_PATH = "/";
+
+    public static final int ADMIN_ID = 1;
 
     private static final String LANG = "zh-cn";
 
@@ -59,9 +63,23 @@ public class WechatLogic {
 
     public void checkJsUrl(@RequestParam("url") String urlString) throws MalformedURLException {
         URL url = new URL(urlString);
-        if (!ALLOWED_PROTOCOL.equals(url.getProtocol()) || !ALLOWED_HOST.equals(url.getHost()) || !ALLOWED_PATH.equals(
-                url.getPath())) {
+        if (!ALLOWED_PROTOCOL.equals(url.getProtocol()) || !ALLOWED_HOST.equals(url.getHost()) ||
+                !ALLOWED_PATH.equals(url.getPath())) {
             throw new BadRequestException("url 不合法");
         }
+    }
+
+    public void sendNotifyToAdmin(User user) throws WxErrorException {
+        User admin = userService.get(ADMIN_ID);
+        WxMpTemplateMessage message = new WxMpTemplateMessage();
+        message.setToUser(admin.getOpenId());
+        message.setTemplateId("0NTYqPHErV5rlcsBZ7xDOqxmkv6EnMOo4HylFkRAVlg");
+        message.getDatas().add(new WxMpTemplateData("first", "有新用户注册，请联系用户核实身份"));
+        message.getDatas().add(new WxMpTemplateData("keyword1", user.getName()));
+        message.getDatas().add(new WxMpTemplateData("keyword2", new Date().toString()));
+        message.getDatas().add(new WxMpTemplateData("remark", "点击进入审批页面"));
+        message.setUrl(String.format("https://m.jinyufeili.com/#/users/bind?userId=%d", user.getId()));
+
+        wechatService.templateSend(message);
     }
 }

@@ -21,7 +21,7 @@ public class SubscribeMessageHandler extends AbstractTextResponseMessageHandler 
     protected String generateTextMessage(WxMpXmlMessage message, Map<String, Object> context) {
         String oauthUrl = wechatService.oauth2buildAuthorizationUrl("https://m.jinyufeili.com/wx#/close",
                 WxConsts.OAUTH2_SCOPE_USER_INFO,
-                "SUBSCRIBE");
+                WxConsts.EVT_SUBSCRIBE);
 
         return String.format("感谢关注翡丽社区，请先进行账号<a href=\"%s\">授权</a>。", oauthUrl);
     }
