@@ -101,7 +101,7 @@ public class WechatController {
     @RequestMapping("/api/wechat/oauth2-callback")
     public void wechatLoginCallback(HttpServletRequest request, HttpServletResponse response,
                                     Authentication authentication, @RequestParam String callback,
-                                    @RequestParam String code, @RequestParam(defaultValue = "") String state) throws IOException, WxErrorException {
+                                    @RequestParam String code) throws IOException, WxErrorException {
         if (authentication != null && authentication.isAuthenticated()) {
             rememberMeServices.logout(request, response, authentication);
         }
@@ -113,9 +113,7 @@ public class WechatController {
         rememberMeServices.loginSuccess(request, response, authenticationToken);
         response.sendRedirect(callback);
 
-        if (WxConsts.EVT_SUBSCRIBE.equals(state)) {
-            wechatLogic.sendNotifyToAdmin(user);
-        }
+        wechatLogic.sendNotifyToAdmin(user);
     }
 
     @RequestMapping("/api/wechat/js_signature")
