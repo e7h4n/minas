@@ -2,9 +2,9 @@ package com.jinyufeili.minas.wechat.web.ctrl;
 
 import com.jinyufeili.minas.account.data.User;
 import com.jinyufeili.minas.account.service.UserService;
+import com.jinyufeili.minas.crm.service.ResidentService;
 import com.jinyufeili.minas.web.exception.BadRequestException;
 import com.jinyufeili.minas.wechat.web.logic.WechatLogic;
-import me.chanjar.weixin.common.api.WxConsts;
 import me.chanjar.weixin.common.bean.WxJsapiSignature;
 import me.chanjar.weixin.common.exception.WxErrorException;
 import me.chanjar.weixin.common.util.StringUtils;
@@ -19,13 +19,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices;
+import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by pw on 6/10/16.
@@ -39,7 +42,7 @@ public class WechatController {
     private UserService userService;
 
     @Autowired
-    private PersistentTokenBasedRememberMeServices rememberMeServices;
+    private TokenBasedRememberMeServices rememberMeServices;
 
     @Autowired
     private WxMpService wechatService;
@@ -52,6 +55,9 @@ public class WechatController {
 
     @Autowired
     private WechatLogic wechatLogic;
+
+    @Autowired
+    private ResidentService residentService;
 
     @RequestMapping("/api/wechat/test")
     public String test() {
@@ -87,38 +93,38 @@ public class WechatController {
             throw new BadRequestException("msg_signature 不能为空");
         }
 
-        WxMpXmlMessage inMessage = WxMpXmlMessage.fromEncryptedXml(message, wechatConfig, timestamp, nonce,
-                msgSignature);
+        WxMpXmlMessage inMessage =
+                WxMpXmlMessage.fromEncryptedXml(message, wechatConfig, timestamp, nonce, msgSignature);
         WxMpXmlOutMessage outMessage = wechatMessageRouter.route(inMessage);
         if (outMessage == null) {
             LOG.warn("empty out message");
-            outMessage = WxMpXmlOutMessage.TEXT().content("").fromUser(inMessage.getToUserName()).toUser(
-                    inMessage.getFromUserName()).build();
+            outMessage = WxMpXmlOutMessage.TEXT().content("").fromUser(inMessage.getToUserName())
+                    .toUser(inMessage.getFromUserName()).build();
         }
         return outMessage.toEncryptedXml(wechatConfig);
     }
 
     @RequestMapping("/api/wechat/oauth2-callback")
     public void wechatLoginCallback(HttpServletRequest request, HttpServletResponse response,
-                                    Authentication authentication, @RequestParam String callback,
-                                    @RequestParam String code) throws IOException, WxErrorException {
-        if (authentication != null && authentication.isAuthenticated()) {
-            rememberMeServices.logout(request, response, authentication);
-        }
-
+                                    @RequestParam String callback, @RequestParam String code)
+            throws IOException, WxErrorException {
         User user = wechatLogic.initUserByCode(code);
         UserDetails userDetails = userService.loadUserByUsername(user.getOpenId());
-        Authentication authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null,
-                userDetails.getAuthorities());
+        Authentication authenticationToken =
+                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         rememberMeServices.loginSuccess(request, response, authenticationToken);
         response.sendRedirect(callback);
 
-        wechatLogic.sendNotifyToAdmin(user);
+        Set<Integer> userIds = new HashSet<>();
+        userIds.add(user.getId());
+        if (residentService.queryByUserIds(userIds).size() == 0) {
+            wechatLogic.sendNotifyToAdmin(user);
+        }
     }
 
     @RequestMapping("/api/wechat/js_signature")
-    public WxJsapiSignature createJsSignature(
-            @RequestParam("url") String urlString) throws MalformedURLException, WxErrorException {
+    public WxJsapiSignature createJsSignature(@RequestParam("url") String urlString)
+            throws MalformedURLException, WxErrorException {
         wechatLogic.checkJsUrl(urlString);
         return wechatService.createJsapiSignature(urlString);
     }

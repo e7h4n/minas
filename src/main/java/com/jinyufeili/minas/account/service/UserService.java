@@ -38,7 +38,7 @@ public class UserService implements UserDetailsService {
         }
 
         org.springframework.security.core.userdetails.User userDetails =
-                new org.springframework.security.core.userdetails.User(user.getOpenId(), "",
+                new org.springframework.security.core.userdetails.User(user.getOpenId(), user.getOpenId(),
                         getAuthorities(user.getId()));
 
         return userDetails;
