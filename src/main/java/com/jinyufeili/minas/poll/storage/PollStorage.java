@@ -34,6 +34,6 @@ public class PollStorage {
             return Collections.emptyList();
         }
 
-        return db.query("SELECT * FROM poll_poll WHERE id IN (:id)", Collections.singletonMap("ids", ids), ROW_MAPPER);
+        return db.query("SELECT * FROM poll_poll WHERE id IN (:ids)", Collections.singletonMap("ids", ids), ROW_MAPPER);
     }
 }
