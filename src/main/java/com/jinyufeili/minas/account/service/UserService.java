@@ -4,6 +4,7 @@ import com.jinyufeili.minas.account.data.User;
 import com.jinyufeili.minas.account.storage.UserGroupStorage;
 import com.jinyufeili.minas.account.storage.UserStorage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,7 +30,12 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = getByOpenId(username);
+            User user;
+        try {
+            user = getByOpenId(username);
+        } catch (EmptyResultDataAccessException e) {
+            throw new UsernameNotFoundException("user " + username + " not found");
+        }
 
         org.springframework.security.core.userdetails.User userDetails =
                 new org.springframework.security.core.userdetails.User(user.getOpenId(), "",
