@@ -9,8 +9,10 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Collections;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Created by pw on 6/11/16.
@@ -47,12 +49,26 @@ public class RoomStorage {
                 " AND house_number = :houseNumber", parameterSource, ROW_MAPPER);
     }
 
-    public List<Room> getByIds(Set<Integer> roomIds) {
+    public Map<Integer, Room> getByIds(Set<Integer> roomIds) {
         if (CollectionUtils.isEmpty(roomIds)) {
-            return Collections.emptyList();
+            return Collections.emptyMap();
         }
 
         return db.query("SELECT * FROM crm_room WHERE id IN (:ids)", Collections.singletonMap("ids", roomIds),
-                ROW_MAPPER);
+                ROW_MAPPER).stream().collect(Collectors.toMap(Room::getId, Function.identity()));
+    }
+
+    public Room getByLocation(int region, int building, int unit, int houseNumber) {
+        MapSqlParameterSource source = new MapSqlParameterSource();
+        source.addValue("region", region);
+        source.addValue("building", building);
+        source.addValue("unit", unit);
+        source.addValue("houseNumber", houseNumber);
+
+        return db.queryForObject("select * from crm_room" +
+                " where region = :region" +
+                " and building = :building" +
+                " and unit = :unit" +
+                " and house_number = :houseNumber", source, ROW_MAPPER);
     }
 }

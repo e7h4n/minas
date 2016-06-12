@@ -77,7 +77,7 @@ public class ResidentSearchMessageInterceptor extends AbstractRoleInterceptor {
         if (!CollectionUtils.isEmpty(residents)) {
             roomResidentMap = getRoomResidentMap(residents);
             Set<Integer> roomIds = roomResidentMap.keySet();
-            roomList = roomService.getByIds(roomIds);
+            roomList = roomService.getByIds(roomIds).values().stream().collect(Collectors.toList());
         }
 
         if (CollectionUtils.isEmpty(roomList)) {

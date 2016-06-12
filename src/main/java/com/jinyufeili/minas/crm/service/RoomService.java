@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -34,7 +35,11 @@ public class RoomService {
         return roomStorage.getByHouseNumber(region, building, unit, houseNumber);
     }
 
-    public List<Room> getByIds(Set<Integer> roomIds) {
+    public Map<Integer, Room> getByIds(Set<Integer> roomIds) {
         return roomStorage.getByIds(roomIds);
+    }
+
+    public Room getByLocation(int region, int building, int unit, int houseNumber) {
+        return roomStorage.getByLocation(region, building, unit, houseNumber);
     }
 }

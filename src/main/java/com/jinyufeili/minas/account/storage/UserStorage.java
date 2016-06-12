@@ -44,9 +44,13 @@ public class UserStorage {
     private NamedParameterJdbcOperations db;
 
     public User get(int id) {
+        WechatUser wechatUser =
+                db.queryForObject("SELECT * FROM wechat_wechatuser WHERE id = :id", Collections.singletonMap("id", id),
+                        WECHAT_ROW_MAPPER);
+
         AuthUser authUser = db.queryForObject("SELECT * FROM auth_user WHERE id = :id",
-                Collections.singletonMap("id", id), ROW_MAPPER);
-        return getUser(authUser);
+                Collections.singletonMap("id", wechatUser.getUserId()), ROW_MAPPER);
+        return mergeUser(authUser, wechatUser);
     }
 
     public User getByOpenId(String openId) {
@@ -58,8 +62,9 @@ public class UserStorage {
     }
 
     public List<User> queryByName(String name) {
-        List<AuthUser> authUsers = db.query("SELECT * FROM auth_user WHERE first_name = :name",
-                Collections.singletonMap("name", name), ROW_MAPPER);
+        List<AuthUser> authUsers =
+                db.query("SELECT * FROM auth_user WHERE first_name = :name", Collections.singletonMap("name", name),
+                        ROW_MAPPER);
 
         return authUsers.stream().map(this::getUser).collect(Collectors.toList());
     }
@@ -110,8 +115,8 @@ public class UserStorage {
         params.addValue("refreshToken", user.getRefreshToken());
         params.addValue("id", user.getId());
 
-        WechatUser wechatUser = db.queryForObject("SELECT * FROM wechat_wechatuser WHERE id = :id", params,
-                WECHAT_ROW_MAPPER);
+        WechatUser wechatUser =
+                db.queryForObject("SELECT * FROM wechat_wechatuser WHERE id = :id", params, WECHAT_ROW_MAPPER);
         params.addValue("userId", wechatUser.getUserId());
 
         boolean success = db.update("UPDATE auth_user SET first_name = :name WHERE id = :userId", params) > 0;
@@ -122,6 +127,31 @@ public class UserStorage {
                 ", expire_at = :expiredTime WHERE id = :id", params) > 0;
 
         return success;
+    }
+
+    public List<User> queryFreeUser() {
+        List<Integer> userIds = db.queryForList("select wu.id" +
+                " from wechat_wechatuser wu" +
+                " left join crm_resident r on r.wechat_user_id = wu.id" +
+                " where r.id is NULL", Collections.emptyMap(), Integer.class);
+
+        return userIds.stream().map(this::get).collect(Collectors.toList());
+    }
+
+    public List<User> queryByGroupId(int groupId) {
+        return db.query("select u.*" +
+                " from auth_user u" +
+                " join auth_user_groups ug on ug.user_id = u.id" +
+                " where ug.group_id = :groupId", Collections.singletonMap("groupId", groupId), ROW_MAPPER).stream()
+                .map(this::getUser).collect(Collectors.toList());
+    }
+
+    public List<User> queryNonGroupUser() {
+        return db.query("select u.*" +
+                " from auth_user u" +
+                " left join auth_user_groups ug on ug.user_id = u.id" +
+                " where ug.id is NULL", Collections.emptyMap(), ROW_MAPPER).stream().map(this::getUser)
+                .collect(Collectors.toList());
     }
 
     private User getUser(AuthUser authUser) {

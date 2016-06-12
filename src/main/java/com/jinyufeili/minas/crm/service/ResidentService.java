@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,6 +39,26 @@ public class ResidentService {
     public List<Resident> queryByUserName(String userName) {
         List<User> users = userStorage.queryByName(userName);
         Set<Integer> userIds = users.stream().map(User::getId).collect(Collectors.toSet());
+        return residentStorage.queryByUserIds(userIds).values().stream().collect(Collectors.toList());
+    }
+
+    public Map<Integer, Resident> queryByUserIds(Set<Integer> userIds) {
         return residentStorage.queryByUserIds(userIds);
+    }
+
+    public List<Resident> queryByRoom(int region, int building, int unit, int houseNumber) {
+        return residentStorage.queryByRoom(region, building, unit, houseNumber);
+    }
+
+    public boolean update(Resident resident) {
+        return residentStorage.update(resident);
+    }
+
+    public Resident get(int residentId) {
+        return residentStorage.get(residentId);
+    }
+
+    public boolean create(Resident resident) {
+        return residentStorage.create(resident);
     }
 }
