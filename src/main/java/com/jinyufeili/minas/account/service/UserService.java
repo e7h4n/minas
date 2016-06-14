@@ -72,6 +72,10 @@ public class UserService implements UserDetailsService {
         return userStorage.queryNonGroupUser();
     }
 
+    public List<User> queryUnbinded() {
+        return userStorage.queryUnbinded();
+    }
+
     private Collection<GrantedAuthority> getAuthorities(int userId) {
         return userGroupStorage.getGroupsOfUser(userId).stream().map(g -> new SimpleGrantedAuthority("ROLE_" + g.getName()))
                 .collect(Collectors.toSet());

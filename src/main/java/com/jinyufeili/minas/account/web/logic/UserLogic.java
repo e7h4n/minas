@@ -110,6 +110,14 @@ public class UserLogic {
         return get(userId);
     }
 
+    public List<UserVO> queryUnbinded() {
+        return fillRoom(userVOWrapper.wrap(userService.queryUnbinded()));
+    }
+
+    private List<UserVO> fillRoom(List<UserVO> userVOs) {
+        return userVOs;
+    }
+
     private void sendBindResidentNotification(int userId) throws WxErrorException {
         UserVO vo = get(userId);
         User user = userService.get(userId);

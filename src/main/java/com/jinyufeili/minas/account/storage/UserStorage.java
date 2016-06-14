@@ -9,6 +9,8 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -79,7 +81,8 @@ public class UserStorage {
         params.addValue("refreshToken", user.getRefreshToken());
 
         params.addValue("_username", user.getName() + System.currentTimeMillis());
-        params.addValue("_password", user.getName() + System.currentTimeMillis() + user.getRefreshToken());
+        SecureRandom random = new SecureRandom();
+        params.addValue("_password", new BigInteger(130, random).toString(32));
 
         KeyHolder kh = new GeneratedKeyHolder();
         db.update("INSERT INTO auth_user" +
@@ -152,6 +155,14 @@ public class UserStorage {
                 " left join auth_user_groups ug on ug.user_id = u.id" +
                 " where ug.id is NULL", Collections.emptyMap(), ROW_MAPPER).stream().map(this::getUser)
                 .collect(Collectors.toList());
+    }
+
+    public List<User> queryUnbinded() {
+        List<Integer> userIds = db.queryForList(
+                "select wu.id from wechat_wechatuser wu left join crm_resident r on r.wechat_user_id = wu.id where r.id is NULL",
+                Collections.emptyMap(), Integer.class);
+
+        return userIds.stream().map(this::get).collect(Collectors.toList());
     }
 
     private User getUser(AuthUser authUser) {

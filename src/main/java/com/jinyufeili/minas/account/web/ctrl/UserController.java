@@ -53,8 +53,14 @@ public class UserController {
     }
 
     @RequestMapping("/api/users")
-    @PreAuthorize("hasRole('筹备组')")
+    @PreAuthorize("hasRole('筹备组') or #groupId == 1")
     public List<UserVO> query(@RequestParam(defaultValue = "-1") int groupId) {
         return userLogic.queryUser(groupId);
+    }
+
+    @RequestMapping("/api/users/unbinded")
+    @PreAuthorize("hasRole('筹备组')")
+    public List<UserVO> queryUnbinded() {
+        return userLogic.queryUnbinded();
     }
 }

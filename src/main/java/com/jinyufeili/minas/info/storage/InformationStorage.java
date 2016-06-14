@@ -18,7 +18,11 @@ public class InformationStorage {
         Information information = new Information();
 
         information.setId(rs.getInt("id"));
-        information.setContent(rs.getString("content"));
+        String content = rs.getString("content");
+        if (content != null) {
+            content = content.replaceAll("\\r\\n", "\n");
+        }
+        information.setContent(content);
         information.setEventKey(rs.getString("event_key"));
         
         return information;

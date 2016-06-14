@@ -9,7 +9,6 @@ package com.jinyufeili.minas.account.web.ctrl;
 import com.jinyufeili.minas.account.data.UserGroup;
 import com.jinyufeili.minas.account.service.UserGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,13 +25,11 @@ public class UserGroupController {
     private UserGroupService userGroupService;
 
     @RequestMapping("/api/groups")
-    @PreAuthorize("hasRole('筹备组')")
     public List<UserGroup> getAll() {
         return userGroupService.getAll();
     }
 
     @RequestMapping("/api/groups/{groupId}")
-    @PreAuthorize("hasRole('筹备组')")
     public UserGroup get(@PathVariable int groupId) {
         return userGroupService.get(groupId);
     }
