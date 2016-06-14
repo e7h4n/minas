@@ -10,6 +10,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class Application {
 
     public static void main(String[] args) {
-        SpringApplication.run(Application.class);
+        SpringApplication application = new SpringApplication(Application.class);
+        application.setWebEnvironment(true);
+        application.run(args);
     }
 }
