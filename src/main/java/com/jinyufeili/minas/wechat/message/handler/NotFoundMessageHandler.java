@@ -24,7 +24,9 @@ public class NotFoundMessageHandler implements WxMpMessageHandler {
     public WxMpXmlOutMessage handle(WxMpXmlMessage wxMessage, Map<String, Object> context, WxMpService wxMpService,
                                     WxSessionManager sessionManager) throws WxErrorException {
 
-        LOG.info("Uncaught message, fromUser={}, message={}", wxMessage.getFromUserName(), wxMessage.getContent());
+        LOG.info("Uncaught message, fromUser={}, message={}, type={}, event={}, eventKey={}",
+                wxMessage.getFromUserName(), wxMessage.getContent(), wxMessage.getMsgType(), wxMessage.getEvent(),
+                wxMessage.getEventKey());
         return null;
     }
 }
