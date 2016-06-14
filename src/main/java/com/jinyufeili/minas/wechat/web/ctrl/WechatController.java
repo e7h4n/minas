@@ -117,8 +117,10 @@ public class WechatController {
 
         Set<Integer> userIds = new HashSet<>();
         userIds.add(user.getId());
+
         if (residentService.queryByUserIds(userIds).size() == 0) {
             wechatLogic.sendNotifyToAdmin(user);
+            userService.sendBindNotification(user);
         }
     }
 
