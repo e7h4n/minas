@@ -9,6 +9,8 @@ package com.jinyufeili.minas.wechat.message.handler;
 import com.jinyufeili.minas.sensor.data.DataPoint;
 import com.jinyufeili.minas.sensor.data.DataPointType;
 import com.jinyufeili.minas.sensor.service.DataPointService;
+import com.jinyufeili.minas.wechat.data.AqiLevel;
+import com.jinyufeili.minas.wechat.util.AqiUtils;
 import me.chanjar.weixin.mp.bean.WxMpXmlMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +50,23 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
 
         if (System.currentTimeMillis() - pm25.getTimestamp() < ALLOWED_LAG) {
             messages.add(String.format("PM2.5: %.0fug/m^3", pm25.getValue()));
+
+            AqiLevel usAqi = AqiUtils.getAqi(AqiLevel.US_AQI_LEVELS, pm25.getValue());
+            if (usAqi == null) {
+                messages.add("空气污染指数(美标): 超限");
+            } else {
+                messages.add(String.format("空气指数(美标): %.0f - %s", AqiUtils.calcAqiValue(usAqi, pm25.getValue()),
+                        usAqi.getName()));
+            }
+
+            AqiLevel cnAqi = AqiUtils.getAqi(AqiLevel.CN_AQI_LEVELS, pm25.getValue());
+            if (usAqi == null) {
+                messages.add("空气污染指数(国标): 超限");
+            } else {
+                messages.add(String.format("空气指数(国标): %.0f - %s", AqiUtils.calcAqiValue(cnAqi, pm25.getValue()),
+                        cnAqi.getName()));
+                messages.add(cnAqi.getDesc());
+            }
         }
 
         messages.add("\n<a href=\"http://air.jinyufeili.com\">小区24小时空气质量</a>");
