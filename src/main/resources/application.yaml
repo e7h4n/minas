@@ -15,3 +15,5 @@ wechat:
   secret:
   token:
   aesKey:
+
+dataPointValidToken: change me

@@ -81,7 +81,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http.rememberMe().key(securityConfig.getKey()).rememberMeServices(rememberMeServices);
 
         http.csrf().disable().authorizeRequests()
-                .antMatchers("/api/wechat/oauth2-callback", "/api/wechat/js_signature", "/api/wechat/handler")
+                .antMatchers(
+                        "/api/wechat/oauth2-callback",
+                        "/api/wechat/js_signature",
+                        "/api/wechat/handler",
+                        "/api/sensor/**"
+                )
                 .permitAll().anyRequest().authenticated().and().exceptionHandling()
                 .authenticationEntryPoint(authEntryPoint).and().sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
