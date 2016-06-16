@@ -11,6 +11,6 @@ package com.jinyufeili.minas.sensor.data;
  */
 public enum DataPointType {
 
-    TEMPERATURE, HUMIDITY, BMP_TEMPERATURE, PRESSURE, ALTITUDE, LUX
+    TEMPERATURE, HUMIDITY, BMP_TEMPERATURE, PRESSURE, ALTITUDE, LUX, PM25
 }
 

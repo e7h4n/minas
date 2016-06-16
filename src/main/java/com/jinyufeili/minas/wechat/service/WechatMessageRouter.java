@@ -36,6 +36,9 @@ public class WechatMessageRouter extends WxMpMessageRouter {
     @Autowired
     private InformationMessageHandler informationMessageHandler;
 
+    @Autowired
+    private WeatherMessageHandler weatherMessageHandler;
+
     public WechatMessageRouter(WxMpService wxMpService) {
         super(wxMpService);
     }
@@ -48,6 +51,14 @@ public class WechatMessageRouter extends WxMpMessageRouter {
                 .msgType(WxConsts.XML_MSG_EVENT)
                 .event(WxConsts.EVT_SUBSCRIBE)
                 .handler(subscribeMessageHandler)
+                .end()
+
+                .rule()
+                .async(false)
+                .msgType(WxConsts.XML_MSG_EVENT)
+                .event(WxConsts.EVT_CLICK)
+                .eventKey("WEATHER")
+                .handler(weatherMessageHandler)
                 .end()
 
                 .rule()
