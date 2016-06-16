@@ -31,7 +31,7 @@ public class DataPointStorage {
 
         dataPoint.setId(rs.getInt("id"));
         dataPoint.setValue(rs.getDouble("value"));
-        dataPoint.setTimestamp(rs.getDate("time").getTime());
+        dataPoint.setTimestamp(rs.getTimestamp("time").getTime());
         dataPoint.setType(DataPointType.valueOf(rs.getString("type")));
 
         return dataPoint;

@@ -21,7 +21,8 @@ public abstract class AbstractTextResponseMessageHandler implements WxMpMessageH
     @Override
     public WxMpXmlOutMessage handle(WxMpXmlMessage wxMessage, Map<String, Object> context, WxMpService wxMpService,
                                     WxSessionManager sessionManager) throws WxErrorException {
-        return WxMpXmlOutMessage.TEXT().content(this.generateTextMessage(wxMessage, context)).fromUser(
+        String content = this.generateTextMessage(wxMessage, context);
+        return WxMpXmlOutMessage.TEXT().content(content).fromUser(
                 wxMessage.getToUserName()).toUser(wxMessage.getFromUserName()).build();
     }
 

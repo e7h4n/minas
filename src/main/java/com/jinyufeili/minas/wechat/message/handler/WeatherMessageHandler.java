@@ -10,10 +10,14 @@ import com.jinyufeili.minas.sensor.data.DataPoint;
 import com.jinyufeili.minas.sensor.data.DataPointType;
 import com.jinyufeili.minas.sensor.service.DataPointService;
 import me.chanjar.weixin.mp.bean.WxMpXmlMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +29,8 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
 
     public static final int ALLOWED_LAG = 10 * 60 * 1000;
 
+    private final Logger LOG = LoggerFactory.getLogger(this.getClass());
+
     @Autowired
     private DataPointService dataPointService;
 
@@ -34,21 +40,18 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
         DataPoint humidity = dataPointService.query(DataPointType.HUMIDITY, 1).get(0);
         DataPoint pm25 = dataPointService.query(DataPointType.PM25, 1).get(0);
 
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy年M月d日 H点mm分");
         List<String> messages = new ArrayList<>();
-        if (System.currentTimeMillis() - temperature.getTimestamp() < ALLOWED_LAG) {
-            messages.add(String.format("温度: %.1f摄氏度", temperature.getValue()));
-        }
-
-        if (System.currentTimeMillis() - humidity.getTimestamp() < ALLOWED_LAG) {
-            messages.add(String.format("湿度: %.1f%%", humidity.getValue()));
-        }
+        messages.add(String.format("%s", formatter.format(new Date(temperature.getTimestamp()))));
+        messages.add(String.format("温度: %.1f℃", temperature.getValue()));
+        messages.add(String.format("湿度: %.1f%%", humidity.getValue()));
 
         if (System.currentTimeMillis() - pm25.getTimestamp() < ALLOWED_LAG) {
             messages.add(String.format("PM2.5: %.0fug/m^3", pm25.getValue()));
         }
 
-        messages.add(String.format("湿度: %.1f", temperature.getValue()));
-        String.format("温度: %.1f\n湿度: %.1f", temperature.getValue(), humidity.getValue());
-        return null;
+        messages.add("\n<a href=\"http://air.jinyufeili.com\">小区24小时空气质量</a>");
+
+        return String.join("\n", messages);
     }
 }
