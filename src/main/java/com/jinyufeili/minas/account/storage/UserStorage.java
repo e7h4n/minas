@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -171,6 +172,17 @@ public class UserStorage {
         source.addValue("cursor", cursor);
         return db.queryForList("select id from wechat_wechatuser where id > :cursor order by id asc limit :limit",
                 source, Integer.class);
+    }
+
+    @Transactional
+    public boolean remove(int userId) {
+        int authUserId = db.queryForObject(
+                "select u.id from auth_user u join wechat_wechatuser wu on wu.user_id = u.id where wu.id = :userId",
+                Collections.singletonMap("userId", userId), Integer.class);
+        db.update("delete from wechat_wechatuser where id = :userId", Collections.singletonMap("userId", userId));
+        db.update("delete from auth_user_groups where user_id = :authUserId", Collections.singletonMap("authUserId", authUserId));
+        db.update("delete from auth_user where id = :authUserId", Collections.singletonMap("authUserId", authUserId));
+        return true;
     }
 
     private User getUser(AuthUser authUser) {

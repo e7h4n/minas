@@ -8,7 +8,9 @@ package com.jinyufeili.minas.wechat.cron;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jinyufeili.minas.account.data.User;
-import com.jinyufeili.minas.account.storage.UserStorage;
+import com.jinyufeili.minas.account.service.UserService;
+import com.jinyufeili.minas.crm.data.Resident;
+import com.jinyufeili.minas.crm.service.ResidentService;
 import me.chanjar.weixin.common.exception.WxErrorException;
 import me.chanjar.weixin.common.util.StringUtils;
 import me.chanjar.weixin.mp.api.WxMpService;
@@ -21,6 +23,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,7 +40,7 @@ public class WechatUserInfoUpdateJob {
     private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    private UserStorage userStorage;
+    private UserService userService;
 
     @Autowired
     private WxMpService wechatService;
@@ -45,14 +48,17 @@ public class WechatUserInfoUpdateJob {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Scheduled(cron = "*/10 * * * * *")
+    @Autowired
+    private ResidentService residentService;
+
+    @Scheduled(cron = "0 */10 * * * *")
     @Async
     public void update() throws WxErrorException, IOException {
         LOG.info("start job to update wechat user info");
 
         int cursor = 0;
         while (true) {
-            List<Integer> userIds = userStorage.getUserIds(cursor, 100);
+            List<Integer> userIds = userService.getUserIds(cursor, 100);
             if (CollectionUtils.isEmpty(userIds)) {
                 break;
             }
@@ -60,7 +66,7 @@ public class WechatUserInfoUpdateJob {
             cursor = userIds.get(userIds.size() - 1);
 
             List<Map<String, Object>> userIdMap = userIds.stream().map(id -> {
-                User user = userStorage.get(id);
+                User user = userService.get(id);
                 Map<String, Object> entry = new HashMap<>();
                 entry.put("openid", user.getOpenId());
                 entry.put("lang", "zh_CN");
@@ -75,13 +81,24 @@ public class WechatUserInfoUpdateJob {
 
             for (Map<String, Object> userInfoMap : retMap.get("user_info_list")) {
                 WxMpUser wxMpUser = WxMpUser.fromJson(objectMapper.writeValueAsString(userInfoMap));
+                User user = userService.getByOpenId(wxMpUser.getOpenId());
+                Resident resident =
+                        residentService.queryByUserIds(Collections.singleton(user.getId())).get(user.getId());
+
+                if (!wxMpUser.isSubscribe() && resident == null) {
+                    LOG.info("unbinded user unsubscribed, try to remove this user, userId={}, name={}", user.getId(),
+                            user.getName());
+                    userService.remove(user.getId());
+                    return;
+                }
+
                 if (StringUtils.isNotBlank(wxMpUser.getNickname())) {
-                    User user = userStorage.getByOpenId(wxMpUser.getOpenId());
                     if (!user.getName().equals(wxMpUser.getNickname())) {
-                        LOG.info("update user, openId={}, oldName={}, newName={}", user.getOpenId(), user.getName(), wxMpUser.getNickname());
+                        LOG.info("update user, openId={}, oldName={}, newName={}", user.getOpenId(), user.getName(),
+                                wxMpUser.getNickname());
                         user.setName(wxMpUser.getNickname());
                         try {
-                            userStorage.update(user);
+                            userService.update(user);
                         } catch (RuntimeException e) {
                             LOG.error("", e);
                         }

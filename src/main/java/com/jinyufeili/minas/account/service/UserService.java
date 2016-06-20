@@ -101,6 +101,14 @@ public class UserService implements UserDetailsService {
         return wechatService.templateSend(message);
     }
 
+    public List<Integer> getUserIds(int cursor, int limit) {
+        return userStorage.getUserIds(cursor, limit);
+    }
+
+    public boolean remove(int id) {
+        return userStorage.remove(id);
+    }
+
     private Collection<GrantedAuthority> getAuthorities(int userId) {
         return userGroupStorage.getGroupsOfUser(userId).stream()
                 .map(g -> new SimpleGrantedAuthority("ROLE_" + g.getName())).collect(Collectors.toSet());
