@@ -2,11 +2,15 @@ package com.jinyufeili.minas;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * Created by pw on 6/9/16.
  */
 @SpringBootApplication
+@EnableScheduling
+@EnableAsync
 public class Application {
 
     public static void main(String[] args) {

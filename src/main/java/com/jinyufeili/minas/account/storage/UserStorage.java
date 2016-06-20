@@ -165,6 +165,14 @@ public class UserStorage {
         return userIds.stream().map(this::get).collect(Collectors.toList());
     }
 
+    public List<Integer> getUserIds(int cursor, int limit) {
+        MapSqlParameterSource source = new MapSqlParameterSource();
+        source.addValue("limit", limit);
+        source.addValue("cursor", cursor);
+        return db.queryForList("select id from wechat_wechatuser where id > :cursor order by id asc limit :limit",
+                source, Integer.class);
+    }
+
     private User getUser(AuthUser authUser) {
         WechatUser wechatUser = db.queryForObject("SELECT * FROM wechat_wechatuser WHERE user_id = :userId",
                 Collections.singletonMap("userId", authUser.getId()), WECHAT_ROW_MAPPER);
