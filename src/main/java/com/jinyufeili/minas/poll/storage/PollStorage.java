@@ -27,6 +27,7 @@ public class PollStorage {
         poll.setId(rs.getInt("id"));
         poll.setName(rs.getString("name"));
         poll.setStatus(PollStatus.findByInt(rs.getInt("status")));
+        poll.setDesc(rs.getString("desc"));
 
         return poll;
     });

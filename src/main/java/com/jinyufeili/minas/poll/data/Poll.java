@@ -11,6 +11,8 @@ public class Poll {
 
     private PollStatus status;
 
+    private String desc;
+
     public int getId() {
         return id;
     }
@@ -33,5 +35,13 @@ public class Poll {
 
     public void setStatus(PollStatus status) {
         this.status = status;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
+
+    public String getDesc() {
+        return desc;
     }
 }
