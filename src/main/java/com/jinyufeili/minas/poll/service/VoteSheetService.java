@@ -20,4 +20,8 @@ public class VoteSheetService {
     public List<VoteSheet> getByRoomIds(Set<Integer> roomIds) {
         return voteSheetStorage.getByRoomIds(roomIds);
     }
+
+    public VoteSheet getByResidentId(int pollId, int residentId) {
+        return voteSheetStorage.getByResidentId(pollId, residentId);
+    }
 }

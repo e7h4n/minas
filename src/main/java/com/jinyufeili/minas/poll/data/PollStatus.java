@@ -15,44 +15,44 @@ import java.util.Map;
 /**
  * @author pw
  */
-public enum AnswerResult {
+public enum PollStatus {
 
-    ABSTENTION(0, "abstention"),
+    INIT(0, "init"),
 
-    POSITIVE(1, "positive"),
+    PUBLISHED(1, "published"),
 
-    NEGATIVE(-1, "negative"),
+    FINISHED(2, "finished"),
 
-    RENUNCIATION(-2, "renunciation");
+    CANCELLED(-1, "cancelled");
 
     private int value;
 
     private String name;
 
-    AnswerResult(int value, String name) {
+    PollStatus(int value, String name) {
         this.value = value;
         this.name = name;
     }
 
-    public static AnswerResult findByInt(int value) throws IllegalArgumentException {
-        for (AnswerResult item : AnswerResult.values()) {
+    public static PollStatus findByInt(int value) throws IllegalArgumentException {
+        for (PollStatus item : PollStatus.values()) {
             if (item.value == value) {
                 return item;
             }
         }
 
-        throw new IllegalArgumentException("Invalid AnswerResult value: " + value);
+        throw new IllegalArgumentException("Invalid PollStatus value: " + value);
     }
 
     @JsonCreator
-    public static AnswerResult findByString(String name) throws IllegalArgumentException {
-        for (AnswerResult item : AnswerResult.values()) {
+    public static PollStatus findByString(String name) throws IllegalArgumentException {
+        for (PollStatus item : PollStatus.values()) {
             if (item.name.equals(name)) {
                 return item;
             }
         }
 
-        throw new IllegalArgumentException("Invalid AnswerResult name: " + name);
+        throw new IllegalArgumentException("Invalid PollStatus name: " + name);
     }
 
     @JsonValue

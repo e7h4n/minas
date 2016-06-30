@@ -23,7 +23,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;

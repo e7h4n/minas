@@ -1,7 +1,7 @@
 package com.jinyufeili.minas.wechat.web.ctrl;
 
 import com.jinyufeili.minas.account.data.User;
-import com.jinyufeili.minas.account.service.UserService;
+import com.jinyufeili.minas.account.service.UserServiceImpl;
 import com.jinyufeili.minas.crm.service.ResidentService;
 import com.jinyufeili.minas.web.exception.BadRequestException;
 import com.jinyufeili.minas.wechat.web.logic.WechatLogic;
@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -39,7 +38,7 @@ public class WechatController {
     private Logger LOG = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userService;
 
     @Autowired
     private TokenBasedRememberMeServices rememberMeServices;

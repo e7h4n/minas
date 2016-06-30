@@ -15,6 +15,10 @@ public class Resident {
 
     private int userId;
 
+    private boolean verified;
+
+    private int voteId;
+
     public int getId() {
         return id;
     }
@@ -53,5 +57,21 @@ public class Resident {
 
     public void setUserId(int userId) {
         this.userId = userId;
+    }
+
+    public boolean isVerified() {
+        return verified;
+    }
+
+    public void setVerified(boolean verified) {
+        this.verified = verified;
+    }
+
+    public int getVoteId() {
+        return voteId;
+    }
+
+    public void setVoteId(int voteId) {
+        this.voteId = voteId;
     }
 }

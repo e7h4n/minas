@@ -1,0 +1,18 @@
+spring.datasource:
+  url: jdbc:h2://testdb;mode=MySQL
+  testOnBorrow: true
+  validationQuery: SELECT 1
+
+security:
+  key: for test
+  cookieName: PERSISTENT
+  securityCookie: for test
+  tokenValiditySeconds: 31536000 # 1 year
+
+wechat:
+  appId:
+  secret:
+  token:
+  aesKey:
+
+dataPointValidToken: change me

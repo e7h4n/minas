@@ -9,6 +9,8 @@ public class Poll {
 
     private String name;
 
+    private PollStatus status;
+
     public int getId() {
         return id;
     }
@@ -23,5 +25,13 @@ public class Poll {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public PollStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(PollStatus status) {
+        this.status = status;
     }
 }

@@ -1,6 +1,7 @@
 package com.jinyufeili.minas.crm.storage;
 
 import com.jinyufeili.minas.crm.data.Resident;
+import org.apache.commons.lang3.RandomUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
@@ -30,6 +31,8 @@ public class ResidentStorage {
         resident.setMobilePhone(rs.getString("mobile_phone"));
         resident.setRoomId(rs.getInt("room_id"));
         resident.setUserId(rs.getInt("wechat_user_id"));
+        resident.setVerified(rs.getBoolean("verified"));
+        resident.setVoteId(rs.getInt("vote_id"));
 
         return resident;
     });
@@ -84,6 +87,7 @@ public class ResidentStorage {
                 " set name = :name" +
                 ", mobile_phone = :mobilePhone" +
                 ", wechat_user_id = :userId" +
+                ", verified = :verified" +
                 " where id = :id", source) > 0;
     }
 
@@ -98,6 +102,28 @@ public class ResidentStorage {
             resident.setMobilePhone("");
         }
 
+        // 数据量小的时候应该不会有问题...
+        int voteId = 0;
+        int tryCount = 10;
+        while (--tryCount > 0) {
+            voteId = RandomUtils.nextInt(100000, 999999);
+            if (String.valueOf(voteId).indexOf("4") != -1) {
+                continue;
+            }
+
+            int count = db.queryForObject("select count(*) from crm_resident where vote_id = :voteId",
+                    Collections.singletonMap("voteId", voteId), Integer.class);
+            if (count == 0) {
+                break;
+            }
+        }
+        if (tryCount == 0) {
+            // 考虑扩大 voteId 的范围
+            throw new RuntimeException("无法生成合适的 voteId");
+        }
+
+        resident.setVoteId(voteId);
+
         BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(resident);
 
         return db.update("insert into crm_resident" +
@@ -105,10 +131,21 @@ public class ResidentStorage {
                 ", name = :name" +
                 ", mobile_phone = :mobilePhone" +
                 ", telephone = ''" +
-                ", wechatOpenId = ''" +
                 ", sex = 0" +
                 ", address = ''" +
                 ", room_id = :roomId" +
-                ", wechat_user_id = :userId", source) > 0;
+                ", wechat_user_id = :userId" +
+                ", verified = :verified" +
+                ", vote_id = :voteId", source) > 0;
+    }
+
+    public Map<Integer, Resident> getByIds(Set<Integer> residentIds) {
+        if (CollectionUtils.isEmpty(residentIds)) {
+            return Collections.emptyMap();
+        }
+
+        return db.query("select * from crm_resident where id in (:residentIds)",
+                Collections.singletonMap("residentIds", residentIds), ROW_MAPPER).stream()
+                .collect(Collectors.toMap(Resident::getId, Function.identity()));
     }
 }

@@ -1,6 +1,6 @@
 package com.jinyufeili.minas.configuration;
 
-import com.jinyufeili.minas.account.service.UserService;
+import com.jinyufeili.minas.account.service.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.Http401AuthenticationEntryPoint;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -30,7 +30,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private Http401AuthenticationEntryPoint authEntryPoint;
 
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userService;
 
     @Autowired
     private SecurityConfig securityConfig;

@@ -2,7 +2,9 @@ package com.jinyufeili.minas.poll.storage;
 
 import com.jinyufeili.minas.poll.data.VoteSheet;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
@@ -43,5 +45,19 @@ public class VoteSheetStorage {
 
         return db.query("SELECT * FROM poll_votesheet WHERE room_id IN (:roomIds)",
                 Collections.singletonMap("roomIds", roomIds), ROW_MAPPER);
+    }
+
+    public VoteSheet getByResidentId(int pollId, int residentId) {
+        MapSqlParameterSource source = new MapSqlParameterSource();
+        source.addValue("pollId", pollId);
+        source.addValue("residentId", residentId);
+
+        try {
+            return db.queryForObject(
+                    "SELECT * FROM poll_votesheet WHERE poll_id = :pollId AND resident_id = :residentId", source,
+                    ROW_MAPPER);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 }

@@ -46,8 +46,7 @@ public class ResidentSearchMessageHandler extends AbstractTextResponseMessageHan
         List<VoteSheet> voteSheetList = voteSheetService.getByRoomIds(roomList.stream().map(Room::getId).collect(
                 Collectors.toSet()));
         Map<Integer, Poll> pollMap = pollService.getByIds(
-                voteSheetList.stream().map(VoteSheet::getPollId).collect(Collectors.toSet())).stream().collect(
-                Collectors.toMap(Poll::getId, Function.identity()));
+                voteSheetList.stream().map(VoteSheet::getPollId).collect(Collectors.toSet()));
 
         if (CollectionUtils.isEmpty(roomList)) {
             return "没有找到结果，请检查输入格式，例如: 14101, 211101, 陈之光";
