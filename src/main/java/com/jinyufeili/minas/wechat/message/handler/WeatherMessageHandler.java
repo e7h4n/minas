@@ -12,6 +12,7 @@ import com.jinyufeili.minas.sensor.service.DataPointService;
 import com.jinyufeili.minas.wechat.data.AqiLevel;
 import com.jinyufeili.minas.wechat.util.AqiUtils;
 import me.chanjar.weixin.mp.bean.WxMpXmlMessage;
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,8 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
     public static final int ALLOWED_LAG = 10 * 60 * 1000;
 
     private final Logger LOG = LoggerFactory.getLogger(this.getClass());
+
+    private static final String[] HOME_USERS = {"obQ_WwJFoQCEw7RqINOxd7Y_59zI", "obQ_WwBgW__vZwHvHXF_CdW5sIEM"};
 
     @Autowired
     private DataPointService dataPointService;
@@ -70,6 +73,17 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
                 messages.add(String.format("空气指数(国标): %.0f - %s", AqiUtils.calcAqiValue(cnAqi, average),
                         cnAqi.getName()));
                 messages.add(cnAqi.getDesc());
+            }
+        }
+
+        if (ArrayUtils.indexOf(HOME_USERS, message.getFromUserName()) != -1) {
+            DataPoint temperatureHome = dataPointService.query(DataPointType.TEMPERATURE_HOME, 1).get(0);
+            DataPoint humidityHome = dataPointService.query(DataPointType.HUMIDITY_HOME, 1).get(0);
+            DataPoint pm25Home = dataPointService.query(DataPointType.PM25_HOME, 1).get(0);
+            messages.add(String.format("\n家里温度: %.1f℃", temperatureHome.getValue()));
+            messages.add(String.format("家里湿度: %.1f%%", humidityHome.getValue()));
+            if (System.currentTimeMillis() - pm25Home.getTimestamp() < ALLOWED_LAG) {
+                messages.add(String.format("家里PM2.5: %.0fug/m^3", pm25Home.getValue()));
             }
         }
 
