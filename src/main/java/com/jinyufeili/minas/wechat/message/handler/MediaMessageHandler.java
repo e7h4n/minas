@@ -16,6 +16,8 @@ import me.chanjar.weixin.mp.bean.WxMpXmlMessage;
 import me.chanjar.weixin.mp.bean.WxMpXmlOutMessage;
 import me.chanjar.weixin.mp.bean.WxMpXmlOutNewsMessage;
 import me.chanjar.weixin.mp.bean.outxmlbuilder.NewsBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +28,8 @@ import java.util.Map;
  */
 @Service
 public class MediaMessageHandler implements WxMpMessageHandler {
+
+    private Logger LOG = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private MediaHelper mediaHelper;
@@ -43,12 +47,12 @@ public class MediaMessageHandler implements WxMpMessageHandler {
             item.setDescription(article.getDigest());
             item.setUrl(article.getUrl());
             item.setPicUrl(mediaHelper.getMediaUrl(article.getThumbMediaId()));
-
             newsBuilder.addArticle(item);
         }
 
         newsBuilder.fromUser(wxMessage.getToUserName());
         newsBuilder.toUser(wxMessage.getFromUserName());
+
         return newsBuilder.build();
     }
 }
