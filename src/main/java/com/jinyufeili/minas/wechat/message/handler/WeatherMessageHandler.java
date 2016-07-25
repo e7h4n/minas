@@ -44,12 +44,14 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
         DataPoint temperature = dataPointService.query(DataPointType.TEMPERATURE, 1).get(0);
         DataPoint humidity = dataPointService.query(DataPointType.HUMIDITY, 1).get(0);
         DataPoint pm25 = dataPointService.query(DataPointType.PM25, 1).get(0);
+        DataPoint pressure = dataPointService.query(DataPointType.PRESSURE, 1).get(0);
 
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy年M月d日 H点mm分");
         List<String> messages = new ArrayList<>();
         messages.add(String.format("%s", formatter.format(new Date(temperature.getTimestamp()))));
         messages.add(String.format("温度: %.1f℃", temperature.getValue()));
         messages.add(String.format("湿度: %.1f%%", humidity.getValue()));
+        messages.add(String.format("气压: %.0fhPa", pressure.getValue() / 100.0));
 
         if (System.currentTimeMillis() - pm25.getTimestamp() < ALLOWED_LAG) {
             double average =
