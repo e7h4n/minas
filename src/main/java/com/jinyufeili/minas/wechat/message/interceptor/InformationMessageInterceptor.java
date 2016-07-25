@@ -27,6 +27,10 @@ public class InformationMessageInterceptor implements WxMpMessageInterceptor {
     @Override
     public boolean intercept(WxMpXmlMessage wxMessage, Map<String, Object> context, WxMpService wxMpService,
                              WxSessionManager sessionManager) throws WxErrorException {
+        if (wxMessage.getEventKey().indexOf("INFO_") != 0) {
+            return false;
+        }
+
         try {
             Information information = informationService.getByKey(wxMessage.getEventKey());
             context.put(CONTEXT_KEY, information);

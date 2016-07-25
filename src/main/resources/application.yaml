@@ -17,3 +17,7 @@ wechat:
   aesKey:
 
 dataPointValidToken: change me
+
+qiniu:
+  access:
+  secret:
