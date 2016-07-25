@@ -41,7 +41,7 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
 
     @Override
     protected String generateTextMessage(WxMpXmlMessage message, Map<String, Object> context) {
-        DataPoint temperature = dataPointService.query(DataPointType.BMP_TEMPERATURE, 1).get(0);
+        DataPoint temperature = dataPointService.query(DataPointType.TEMPERATURE, 1).get(0);
         DataPoint humidity = dataPointService.query(DataPointType.HUMIDITY, 1).get(0);
         DataPoint pm25 = dataPointService.query(DataPointType.PM25, 1).get(0);
 
