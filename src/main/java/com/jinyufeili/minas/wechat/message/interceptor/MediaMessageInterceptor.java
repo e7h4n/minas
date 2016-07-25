@@ -12,6 +12,8 @@ import me.chanjar.weixin.mp.api.WxMpMessageInterceptor;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.WxMpMaterialNews;
 import me.chanjar.weixin.mp.bean.WxMpXmlMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -22,9 +24,11 @@ import java.util.Map;
 @Service
 public class MediaMessageInterceptor implements WxMpMessageInterceptor {
 
+    private Logger LOG = LoggerFactory.getLogger(this.getClass());
     @Override
     public boolean intercept(WxMpXmlMessage wxMessage, Map<String, Object> context, WxMpService wxMpService,
                              WxSessionManager sessionManager) throws WxErrorException {
+
         if (wxMessage.getEventKey().indexOf("MEDIA_") != 0) {
             return false;
         }

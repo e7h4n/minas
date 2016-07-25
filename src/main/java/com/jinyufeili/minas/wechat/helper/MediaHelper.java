@@ -17,6 +17,7 @@ import me.chanjar.weixin.mp.api.WxMpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 
@@ -43,6 +44,7 @@ public class MediaHelper {
     @Autowired
     private BucketManager bucketManager;
 
+    @Cacheable("mediaUrls")
     public String getMediaUrl(String mediaId) {
         try {
             bucketManager.stat(BUCKET, convertKey(mediaId));

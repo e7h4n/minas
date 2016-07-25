@@ -6,6 +6,8 @@
  */
 package com.jinyufeili.minas.wechat.data;
 
+import com.jinyufeili.minas.wechat.util.AqiUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 

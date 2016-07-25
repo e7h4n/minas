@@ -80,5 +80,6 @@
     <orderEntry type="library" name="Maven: com.qiniu:qiniu-java-sdk:7.0.10" level="project" />
     <orderEntry type="library" name="Maven: com.squareup.okhttp:okhttp:2.7.1" level="project" />
     <orderEntry type="library" name="Maven: com.squareup.okio:okio:1.6.0" level="project" />
+    <orderEntry type="library" name="Maven: net.sf.ehcache:ehcache:2.10.2.2.21" level="project" />
   </component>
 </module>
