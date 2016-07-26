@@ -2,8 +2,6 @@ package com.jinyufeili.minas.wechat.service;
 
 import com.jinyufeili.minas.wechat.message.handler.*;
 import com.jinyufeili.minas.wechat.message.interceptor.InformationMessageInterceptor;
-import com.jinyufeili.minas.wechat.message.interceptor.MediaMessageInterceptor;
-import com.jinyufeili.minas.wechat.message.interceptor.ResidentSearchMessageInterceptor;
 import me.chanjar.weixin.common.api.WxConsts;
 import me.chanjar.weixin.mp.api.WxMpMessageRouter;
 import me.chanjar.weixin.mp.api.WxMpService;
@@ -23,13 +21,7 @@ public class WechatMessageRouter extends WxMpMessageRouter {
     private UnsubscribeMessageHandler unsubscribeMessageHandler;
 
     @Autowired
-    private ResidentSearchMessageInterceptor residentSearchMessageInterceptor;
-
-    @Autowired
-    private ResidentSearchMessageHandler residentSearchMessageHandler;
-
-    @Autowired
-    private NotFoundMessageHandler notFoundMessageHandler;
+    private SearchHandler searchHandler;
 
     @Autowired
     private InformationMessageInterceptor informationMessageInterceptor;
@@ -39,6 +31,9 @@ public class WechatMessageRouter extends WxMpMessageRouter {
 
     @Autowired
     private WeatherMessageHandler weatherMessageHandler;
+
+    @Autowired
+    private NotFoundMessageHandler notFoundMessageHandler;
 
     public WechatMessageRouter(WxMpService wxMpService) {
         super(wxMpService);
@@ -70,17 +65,16 @@ public class WechatMessageRouter extends WxMpMessageRouter {
 
                 .rule()
                 .async(false)
-                .msgType(WxConsts.XML_MSG_TEXT)
-                .interceptor(residentSearchMessageInterceptor)
-                .handler(residentSearchMessageHandler)
-                .end()
-
-                .rule()
-                .async(false)
                 .msgType(WxConsts.XML_MSG_EVENT)
                 .event(WxConsts.EVT_CLICK)
                 .interceptor(informationMessageInterceptor)
                 .handler(informationMessageHandler)
+                .end()
+
+                .rule()
+                .async(false)
+                .msgType(WxConsts.XML_MSG_TEXT)
+                .handler(searchHandler)
                 .end()
 
                 .rule()

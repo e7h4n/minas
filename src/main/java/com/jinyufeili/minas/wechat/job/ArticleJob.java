@@ -31,7 +31,6 @@ public class ArticleJob implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         WxMpMaterialNewsBatchGetResult materialNews = wechatService.materialNewsBatchGet(0, 100);
-        materialNews = wechatService.materialNewsBatchGet(0, 100);
         for (WxMpMaterialNewsBatchGetResult.WxMaterialNewsBatchGetNewsItem item : materialNews.getItems()) {
             LOG.info("mediaId={}", item.getMediaId());
             for (WxMpMaterialNews.WxMpMaterialNewsArticle article : item.getContent().getArticles()) {

@@ -21,3 +21,6 @@ dataPointValidToken: change me
 qiniu:
   access:
   secret:
+
+jcseg:
+  lexiconPath: classpath:lexicon/lex-main.lex

@@ -84,11 +84,21 @@
             <artifactId>qiniu-java-sdk</artifactId>
             <version>[7.0.0, 7.0.99]</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/net.sf.ehcache/ehcache -->
         <dependency>
             <groupId>net.sf.ehcache</groupId>
             <artifactId>ehcache</artifactId>
             <version>2.10.2.2.21</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.lionsoul/jcseg-analyzer -->
+        <dependency>
+            <groupId>org.lionsoul</groupId>
+            <artifactId>jcseg-analyzer</artifactId>
+            <version>1.9.9</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-core</artifactId>
+            <version>5.5.2</version>
         </dependency>
     </dependencies>
 </project>
