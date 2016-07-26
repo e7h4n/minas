@@ -9,23 +9,25 @@ package com.jinyufeili.minas.wechat.service;
 import me.chanjar.weixin.common.exception.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.WxMpMaterialNews;
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.analyzing.AnalyzingQueryParser;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author pw
@@ -45,6 +47,11 @@ public class ArticleDirectory {
     @Autowired
     private WxMpService wechatService;
 
+    @Autowired
+    private Analyzer analyzer;
+
+    private Logger LOG = LoggerFactory.getLogger(this.getClass());
+
     public List<WxMpMaterialNews.WxMpMaterialNewsArticle> search(String messageContent) {
         IndexReader indexReader;
         try {
@@ -53,8 +60,18 @@ public class ArticleDirectory {
             throw new RuntimeException(e);
         }
 
+        QueryParser queryParser = new AnalyzingQueryParser(FIELD_CONTENT, analyzer);
+        queryParser.setDefaultOperator(QueryParser.Operator.AND);
+
         IndexSearcher searcher = new IndexSearcher(indexReader);
-        TermQuery query = new TermQuery(new Term(FIELD_CONTENT, messageContent));
+        Query query;
+        try {
+            query = queryParser.parse(messageContent);
+        } catch (ParseException e) {
+            LOG.error("", e);
+            return Collections.emptyList();
+        }
+
         TopDocs topDocs;
 
         try {
