@@ -80,8 +80,8 @@ public class ArticleDirectory {
             throw new RuntimeException(e);
         }
 
-
-        List<WxMpMaterialNews.WxMpMaterialNewsArticle> allArticle = new ArrayList<>();
+        Set<String> urlSet = new HashSet<>();
+        List<WxMpMaterialNews.WxMpMaterialNewsArticle> articles = new ArrayList<>();
         for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
             Document doc;
             try {
@@ -99,19 +99,12 @@ public class ArticleDirectory {
             }
             WxMpMaterialNews.WxMpMaterialNewsArticle article =
                     materialNews.getArticles().get(Integer.valueOf(doc.get(FIELD_INDEX)));
-            allArticle.add(article);
-
-        }
-
-        List<WxMpMaterialNews.WxMpMaterialNewsArticle> articleList = new ArrayList<>();
-        Set<String> urlSet = new HashSet<>();
-        for (WxMpMaterialNews.WxMpMaterialNewsArticle article : allArticle) {
             if (!urlSet.contains(article.getUrl())) {
                 urlSet.add(article.getUrl());
-                articleList.add(article);
+                articles.add(article);
             }
         }
 
-        return articleList;
+        return articles;
     }
 }
