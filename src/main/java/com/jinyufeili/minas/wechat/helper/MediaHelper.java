@@ -49,19 +49,19 @@ public class MediaHelper {
         try {
             bucketManager.stat(BUCKET, convertKey(mediaId));
         } catch (QiniuException e) {
-            uploadMedia(mediaId);
+            try {
+                uploadMedia(mediaId);
+            } catch (WxErrorException e1) {
+                return null;
+            }
         }
 
         return qiniuAuth.privateDownloadUrl("https://static.jinyufeili.com/" + convertKey(mediaId), 3600);
     }
 
-    private FileInfo uploadMedia(String mediaId) {
-        InputStream inputStream;
-        try {
-            inputStream = wechatService.materialImageOrVoiceDownload(mediaId);
-        } catch (WxErrorException e) {
-            throw new RuntimeException(e);
-        }
+    private FileInfo uploadMedia(String mediaId) throws WxErrorException {
+        InputStream inputStream = wechatService.materialImageOrVoiceDownload(mediaId);
+
 
         byte[] bytes;
         try {

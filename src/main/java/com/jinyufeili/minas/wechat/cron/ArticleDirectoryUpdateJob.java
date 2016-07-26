@@ -16,6 +16,7 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.store.Directory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.List;
 
@@ -61,15 +61,27 @@ public class ArticleDirectoryUpdateJob {
                 List<WxMpMaterialNews.WxMpMaterialNewsArticle> newsArticles = materialNews.getContent().getArticles();
                 for (int j = 0; j < newsArticles.size(); j++) {
                     WxMpMaterialNews.WxMpMaterialNewsArticle article = newsArticles.get(j);
+                    if (article.getTitle().startsWith("*")) {
+                        continue;
+                    }
+
                     Document doc = new Document();
                     doc.add(new IntField(ArticleDirectory.FIELD_INDEX, j, Field.Store.YES));
-                    doc.add(new StringField(ArticleDirectory.FIELD_MEDIA_ID, materialNews.getMediaId(), Field.Store.YES));
+                    doc.add(new StringField(ArticleDirectory.FIELD_MEDIA_ID, materialNews.getMediaId(),
+                            Field.Store.YES));
                     doc.add(new TextField(ArticleDirectory.FIELD_CONTENT, article.getContent(), Field.Store.YES));
-                    writer.addDocument(doc);
+                    writer.updateDocument(new Term("id", String.format("%s_%d", materialNews.getMediaId(), j)), doc);
                     LOG.info("add doc, mediaId={}, index={}", materialNews.getMediaId(), j);
                 }
             }
         }
         writer.close();
+//
+        //
+        //        List<WxMpMaterialNews.WxMpMaterialNewsArticle> result = articleDirectory.search("登记");
+        //        LOG.info("search result {}", result.size());
+        //        for (WxMpMaterialNews.WxMpMaterialNewsArticle article : result) {
+        //            LOG.info("article {}", article);
+        //        }
     }
 }

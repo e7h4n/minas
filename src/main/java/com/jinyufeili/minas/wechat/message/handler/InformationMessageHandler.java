@@ -43,7 +43,10 @@ public class InformationMessageHandler extends AbstractTextResponseMessageHandle
                 item.setTitle(article.getTitle());
                 item.setDescription(article.getDigest());
                 item.setUrl(article.getUrl());
-                item.setPicUrl(mediaHelper.getMediaUrl(article.getThumbMediaId()));
+                String picUrl = mediaHelper.getMediaUrl(article.getThumbMediaId());
+                if (StringUtils.isNotBlank(picUrl)) {
+                    item.setPicUrl(picUrl);
+                }
                 newsBuilder.addArticle(item);
             }
 
