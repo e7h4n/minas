@@ -9,7 +9,6 @@ import me.chanjar.weixin.mp.api.WxMpMessageHandler;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.*;
 import me.chanjar.weixin.mp.bean.outxmlbuilder.NewsBuilder;
-import org.apache.lucene.store.Directory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,11 +51,10 @@ public class SearchHandler implements WxMpMessageHandler {
         List<WxMpMaterialNews.WxMpMaterialNewsArticle> articles = articleDirectory.search(messageContent);
 
         if (CollectionUtils.isEmpty(articles)) {
-            return WxMpXmlOutTextMessage.TEXT()
-                    .content(String.format("没有找到到关于\"%s\"的内容", wxMessage.getContent()))
-                    .fromUser(wxMessage.getToUserName())
-                    .toUser(wxMessage.getFromUserName())
-                    .build();
+            if (wxMessage.getContent().length() < 5) {
+                return WxMpXmlOutTextMessage.TEXT().content(String.format("没有找到到关于\"%s\"的内容", wxMessage.getContent()))
+                        .fromUser(wxMessage.getToUserName()).toUser(wxMessage.getFromUserName()).build();
+            }
         }
 
         NewsBuilder newsBuilder = WxMpXmlOutMessage.NEWS();

@@ -42,14 +42,11 @@ public class JcsegDictionaryUpdateJob {
     @Scheduled(cron = "*/10 * * * * *")
     @Async
     public void updateDictionary() throws IOException, WxErrorException {
-        LOG.info("reload dictionary {}", lexiconPath);
         if (lexiconPath.startsWith("classpath:")) {
             String resourcePath = lexiconPath.replace("classpath:", "");
-            LOG.info("load resource {}", resourcePath);
             dictionary.load(getResourceAsStream(resourcePath));
         } else if (lexiconPath.startsWith("file:")) {
             String pathname = lexiconPath.replace("file:", "");
-            LOG.info("load file {}", pathname);
             dictionary.load(new File(pathname));
         }
 
