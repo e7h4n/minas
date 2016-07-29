@@ -9,6 +9,8 @@ package com.jinyufeili.minas.poll.web.ctrl;
 import com.jinyufeili.minas.poll.data.Poll;
 import com.jinyufeili.minas.poll.data.PollStatus;
 import com.jinyufeili.minas.poll.service.PollService;
+import com.jinyufeili.minas.poll.web.data.PollVO;
+import com.jinyufeili.minas.poll.web.logic.PollLogic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +31,9 @@ public class PollController {
     @Autowired
     private PollService pollService;
 
+    @Autowired
+    private PollLogic pollLogic;
+
     @RequestMapping
     public List<Poll> query(@RequestParam(value = "status[]") List<String> strStatuses) {
         Set<PollStatus> statuses = strStatuses.stream().map(PollStatus::findByString).collect(Collectors.toSet());
@@ -37,7 +42,7 @@ public class PollController {
     }
 
     @RequestMapping("/{pollId}")
-    public Poll getById(@PathVariable int pollId) {
-        return pollService.get(pollId);
+    public PollVO getById(@PathVariable int pollId) {
+        return pollLogic.get(pollId);
     }
 }

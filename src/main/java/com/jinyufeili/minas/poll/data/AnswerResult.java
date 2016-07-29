@@ -17,12 +17,14 @@ import java.util.Map;
  */
 public enum AnswerResult {
 
+    // 未参与
     ABSTENTION(0, "abstention"),
 
     POSITIVE(1, "positive"),
 
     NEGATIVE(-1, "negative"),
 
+    // 弃权
     RENUNCIATION(-2, "renunciation");
 
     private int value;
