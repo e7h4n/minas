@@ -10,6 +10,7 @@ import com.jinyufeili.minas.crm.service.ResidentService;
 import com.jinyufeili.minas.crm.service.RoomService;
 import com.jinyufeili.minas.web.exception.BadRequestException;
 import com.jinyufeili.minas.web.exception.ConflictException;
+import com.jinyufeili.minas.wechat.web.logic.WechatLogic;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,6 +60,9 @@ public class UserLogicImplTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private WechatLogic wechatLogic;
 
     @InjectMocks
     private UserLogic userLogic = new UserLogicImpl();
