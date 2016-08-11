@@ -38,7 +38,6 @@ public class SyncWechatUserInfoJob {
     private ResidentService residentService;
 
     @Scheduled(cron = "0 0 0 * * *")
-    @Async
     public void sync() throws WxErrorException {
         LOG.info("start job to sync wechat user info");
 

@@ -21,7 +21,6 @@ import org.apache.lucene.store.Directory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -45,11 +44,7 @@ public class ArticleDirectoryUpdateJob {
     @Autowired
     private Analyzer analyzer;
 
-    @Autowired
-    private ArticleDirectory articleDirectory;
-
     @Scheduled(cron = "0 */10 * * * *")
-    @Async
     public void updateDirectory() throws WxErrorException, IOException {
         WxMpMaterialCountResult materialCount = wechatService.materialCount();
         int newsCount = materialCount.getNewsCount();
@@ -76,12 +71,5 @@ public class ArticleDirectoryUpdateJob {
             }
         }
         writer.close();
-//
-        //
-        //        List<WxMpMaterialNews.WxMpMaterialNewsArticle> result = articleDirectory.search("登记");
-        //        LOG.info("search result {}", result.size());
-        //        for (WxMpMaterialNews.WxMpMaterialNewsArticle article : result) {
-        //            LOG.info("article {}", article);
-        //        }
     }
 }

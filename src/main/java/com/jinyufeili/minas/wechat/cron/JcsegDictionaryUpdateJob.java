@@ -37,10 +37,7 @@ public class JcsegDictionaryUpdateJob {
     @Autowired
     private ArticleDirectoryUpdateJob articleDirectoryUpdateJob;
 
-    private boolean loaded = false;
-
     @Scheduled(cron = "*/10 * * * * *")
-    @Async
     public void updateDictionary() throws IOException, WxErrorException {
         if (lexiconPath.startsWith("classpath:")) {
             String resourcePath = lexiconPath.replace("classpath:", "");
@@ -48,11 +45,6 @@ public class JcsegDictionaryUpdateJob {
         } else if (lexiconPath.startsWith("file:")) {
             String pathname = lexiconPath.replace("file:", "");
             dictionary.load(new File(pathname));
-        }
-
-        if (!loaded) {
-            loaded = true;
-            articleDirectoryUpdateJob.updateDirectory();
         }
     }
 

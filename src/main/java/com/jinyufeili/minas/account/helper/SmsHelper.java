@@ -25,7 +25,7 @@ public class SmsHelper {
         this.key = "key-" + key;
     }
 
-    private void send(String phone, String verifyCode) {
+    public void send(String phone, String verifyCode) {
         Client client = Client.create();
         client.addFilter(new HTTPBasicAuthFilter("api", key));
         WebResource webResource = client.resource("http://sms-api.luosimao.com/v1/send.json");

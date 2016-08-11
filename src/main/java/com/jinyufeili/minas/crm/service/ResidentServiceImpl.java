@@ -75,12 +75,7 @@ public class ResidentServiceImpl implements ResidentService {
     public boolean update(Resident resident) {
         boolean result = residentStorage.update(resident);
         if (result && resident.getUserId() > 0 && resident.getRoomId() > 0) {
-            int residentId = resident.getId();
-            try {
-                syncWechatUserInfo(residentId);
-            } catch (WxErrorException e) {
-                LOG.error("", e);
-            }
+            syncWechat(resident);
         }
         return result;
     }
@@ -110,12 +105,26 @@ public class ResidentServiceImpl implements ResidentService {
     }
 
     @Override
-    public boolean create(Resident resident) {
-        return residentStorage.create(resident);
+    public int create(Resident resident) {
+        int residentId = residentStorage.create(resident);
+        syncWechat(residentId);
+        return residentId;
     }
 
     @Override
     public Map<Integer, Resident> getByIds(Set<Integer> residentIds) {
         return residentStorage.getByIds(residentIds);
+    }
+
+    private void syncWechat(Resident resident) {
+        syncWechat(resident.getId());
+    }
+
+    private void syncWechat(int residentId) {
+        try {
+            syncWechatUserInfo(residentId);
+        } catch (WxErrorException e) {
+            LOG.error("", e);
+        }
     }
 }

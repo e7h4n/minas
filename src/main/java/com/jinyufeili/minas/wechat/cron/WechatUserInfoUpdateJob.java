@@ -51,7 +51,6 @@ public class WechatUserInfoUpdateJob {
     private ResidentService residentService;
 
     @Scheduled(cron = "0 */10 * * * *")
-    @Async
     public void update() throws WxErrorException, IOException {
         LOG.info("start job to update wechat user info");
 

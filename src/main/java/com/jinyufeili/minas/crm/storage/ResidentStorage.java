@@ -7,6 +7,8 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 
@@ -97,7 +99,7 @@ public class ResidentStorage {
                         ROW_MAPPER);
     }
 
-    public boolean create(Resident resident) {
+    public int create(Resident resident) {
         if (resident.getMobilePhone() == null) {
             resident.setMobilePhone("");
         }
@@ -126,7 +128,9 @@ public class ResidentStorage {
 
         BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(resident);
 
-        return db.update("insert into crm_resident" +
+        KeyHolder kh = new GeneratedKeyHolder();
+
+        db.update("insert into crm_resident" +
                 " set id = :id" +
                 ", name = :name" +
                 ", mobile_phone = :mobilePhone" +
@@ -136,7 +140,9 @@ public class ResidentStorage {
                 ", room_id = :roomId" +
                 ", wechat_user_id = :userId" +
                 ", verified = :verified" +
-                ", vote_id = :voteId", source) > 0;
+                ", vote_id = :voteId", source, kh);
+
+        return kh.getKey().intValue();
     }
 
     public Map<Integer, Resident> getByIds(Set<Integer> residentIds) {

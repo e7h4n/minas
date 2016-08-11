@@ -40,7 +40,6 @@ public class WechatMenuUpdateJob {
     private WxMpService wechatService;
 
     @Scheduled(cron = "59 */4 * * * *")
-    @Async
     public void update() throws WxErrorException {
         DataPoint dataPoint = dataPointService.query(DataPointType.PM25, 1).get(0);
         if (System.currentTimeMillis() - dataPoint.getTimestamp() > ALLOWED_LAG) {

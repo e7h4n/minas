@@ -22,9 +22,11 @@ public interface UserLogic {
 
     UserVO get(int userId);
 
-    UserVO update(UserVO vo, boolean verified);
+    UserVO update(UserVO vo);
 
     List<UserVO> queryUnbinded();
 
     List<UserVO> queryUser(int groupId);
+
+    UserVO updateCurrentUser(UserVO user, String verifyCode);
 }

@@ -38,7 +38,7 @@ public interface ResidentService {
 
     Resident get(int residentId);
 
-    boolean create(Resident resident);
+    int create(Resident resident);
 
     Map<Integer, Resident> getByIds(Set<Integer> residentIds);
 }

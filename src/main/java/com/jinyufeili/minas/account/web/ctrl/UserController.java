@@ -6,17 +6,17 @@
  */
 package com.jinyufeili.minas.account.web.ctrl;
 
-import com.jinyufeili.minas.account.data.User;
+import com.jinyufeili.minas.account.service.VerifyCodeService;
 import com.jinyufeili.minas.account.web.data.UserVO;
 import com.jinyufeili.minas.account.web.logic.UserLogic;
 import com.jinyufeili.minas.web.exception.BadRequestException;
 import com.jinyufeili.minas.web.exception.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -27,6 +27,9 @@ public class UserController {
 
     @Autowired
     private UserLogic userLogic;
+
+    @Autowired
+    private VerifyCodeService verifyCodeService;
 
     @RequestMapping("/api/users/current")
     public UserVO currentUser(Authentication authentication) {
@@ -46,19 +49,24 @@ public class UserController {
     }
 
     @RequestMapping(value = "/api/users/{userId}", method = RequestMethod.POST)
-    @PreAuthorize("hasRole('筹备组')")
-    public UserVO update(@PathVariable int userId, @RequestBody UserVO user, Authentication authentication) {
+    public UserVO update(@PathVariable int userId, @RequestBody UserVO user,
+                         @RequestParam(defaultValue = "") String verifyCode, Authentication authentication,
+                         HttpServletRequest request) {
         if (userId != user.getId()) {
             throw new BadRequestException("invalid userId");
         }
 
         UserVO userVO = userLogic.getByAuthentication(authentication);
-        // TODO: check user
-//        if (userVO.getId() != userId) {
-//
-//        }
 
-        return userLogic.update(user, true);
+        if (userVO.getId() != userId && request.isUserInRole("筹备组")) {
+            throw new UnauthorizedException();
+        }
+
+        if (request.isUserInRole("筹备组")) {
+            return userLogic.update(user);
+        } else {
+            return userLogic.updateCurrentUser(user, verifyCode);
+        }
     }
 
     @RequestMapping("/api/users")

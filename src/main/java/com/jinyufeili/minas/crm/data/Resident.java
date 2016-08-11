@@ -74,4 +74,10 @@ public class Resident {
     public void setVoteId(int voteId) {
         this.voteId = voteId;
     }
+
+    @Override
+    public String toString() {
+        return "Resident{" + "id=" + id + ", name='" + name + '\'' + ", mobilePhone='" + mobilePhone + '\'' +
+                ", roomId=" + roomId + ", userId=" + userId + ", verified=" + verified + ", voteId=" + voteId + '}';
+    }
 }
