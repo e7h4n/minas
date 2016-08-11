@@ -32,8 +32,6 @@ public interface UserService {
 
     List<User> queryUnbinded();
 
-    String sendBindNotification(User user) throws WxErrorException;
-
     List<Integer> getUserIds(int cursor, int limit);
 
     boolean remove(int id);

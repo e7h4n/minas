@@ -119,7 +119,6 @@ public class WechatController {
 
         if (residentService.queryByUserIds(userIds).size() == 0) {
             wechatLogic.sendNotifyToAdmin(user);
-            userService.sendBindNotification(user);
         }
     }
 

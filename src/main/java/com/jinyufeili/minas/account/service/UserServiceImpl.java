@@ -96,21 +96,6 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     }
 
     @Override
-    public String sendBindNotification(User user) throws WxErrorException {
-        LOG.info("发送认证通知 {}", user.getName());
-        WxMpTemplateMessage message = new WxMpTemplateMessage();
-        message.setToUser(user.getOpenId());
-        message.setTemplateId("oGq4gWwc4ISaDwUcBMYNX4KvOABiJj14t59f1ANbX6Y");
-        message.getDatas().add(new WxMpTemplateData("first", "翡丽铂庭小区业主身份认证"));
-        message.getDatas().add(new WxMpTemplateData("keyword1", "需要补充个人信息"));
-        message.getDatas().add(new WxMpTemplateData("keyword2", "等待认证"));
-        message.getDatas().add(new WxMpTemplateData("remark",
-                "翡丽社区平台只对小区业主提供服务, 因此需要您提供您的姓名、门牌号及联系方式。\n" +
-                        "您可以直接在此回复以上信息, 例如: 丁仪, 爱公馆4-101, 18601234567。\n该信息仅对筹备组人员可见, 收到您信息后需要1-3天来完成身份认证。"));
-        return wechatService.templateSend(message);
-    }
-
-    @Override
     public List<Integer> getUserIds(int cursor, int limit) {
         return userStorage.getUserIds(cursor, limit);
     }
