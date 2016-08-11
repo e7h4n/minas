@@ -8,17 +8,20 @@ package com.jinyufeili.minas.wechat.configuration;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.RAMDirectory;
+import org.apache.lucene.store.NIOFSDirectory;
 import org.lionsoul.jcseg.analyzer.v5x.JcsegAnalyzer5X;
 import org.lionsoul.jcseg.tokenizer.core.ADictionary;
 import org.lionsoul.jcseg.tokenizer.core.DictionaryFactory;
 import org.lionsoul.jcseg.tokenizer.core.JcsegTaskConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 
 /**
  * @author pw
@@ -26,11 +29,15 @@ import java.io.IOException;
 @Service
 public class LuceneConfiguration {
 
+    @Value("${lucene.directory}")
+    private String luceneDirectory;
+
     private Logger LOG = LoggerFactory.getLogger(this.getClass());
 
     @Bean
-    public Directory directory() {
-        return new RAMDirectory();
+    public Directory directory() throws IOException {
+        Path path = FileSystems.getDefault().getPath(luceneDirectory);
+        return new NIOFSDirectory(path);
     }
 
     @Bean

@@ -74,7 +74,7 @@ public class UserLogicImpl implements UserLogic {
     }
 
     @Override
-    public UserVO update(UserVO vo) {
+    public UserVO update(UserVO vo, boolean verified) {
         int userId = vo.getId();
 
         User user = userService.get(userId);
@@ -90,7 +90,7 @@ public class UserLogicImpl implements UserLogic {
             resident.setMobilePhone(vo.getResident().getMobilePhone());
             resident.setRoomId(vo.getRoom().getId());
             resident.setUserId(userId);
-            resident.setVerified(true);
+            resident.setVerified(verified);
             residentService.create(resident);
         } else if (vo.getResident() != null && vo.getResident().getId() > 0){
             Resident resident = residentService.get(vo.getResident().getId());

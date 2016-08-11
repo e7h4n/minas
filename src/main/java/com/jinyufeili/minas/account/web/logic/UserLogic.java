@@ -22,7 +22,7 @@ public interface UserLogic {
 
     UserVO get(int userId);
 
-    UserVO update(UserVO vo);
+    UserVO update(UserVO vo, boolean verified);
 
     List<UserVO> queryUnbinded();
 

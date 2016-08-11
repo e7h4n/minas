@@ -6,10 +6,13 @@
  */
 package com.jinyufeili.minas.account.web.ctrl;
 
+import com.jinyufeili.minas.account.data.User;
 import com.jinyufeili.minas.account.web.data.UserVO;
 import com.jinyufeili.minas.account.web.logic.UserLogic;
 import com.jinyufeili.minas.web.exception.BadRequestException;
+import com.jinyufeili.minas.web.exception.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -44,12 +47,18 @@ public class UserController {
 
     @RequestMapping(value = "/api/users/{userId}", method = RequestMethod.POST)
     @PreAuthorize("hasRole('筹备组')")
-    public UserVO update(@PathVariable int userId, @RequestBody UserVO user) {
+    public UserVO update(@PathVariable int userId, @RequestBody UserVO user, Authentication authentication) {
         if (userId != user.getId()) {
             throw new BadRequestException("invalid userId");
         }
 
-        return userLogic.update(user);
+        UserVO userVO = userLogic.getByAuthentication(authentication);
+        // TODO: check user
+//        if (userVO.getId() != userId) {
+//
+//        }
+
+        return userLogic.update(user, true);
     }
 
     @RequestMapping("/api/users")

@@ -24,3 +24,7 @@ qiniu:
 
 jcseg:
   lexiconPath: classpath:lexicon/lex-main.lex
+
+luosimao.key:
+
+lucene.directory:
