@@ -55,9 +55,6 @@ public class WechatController {
     @Autowired
     private WechatLogic wechatLogic;
 
-    @Autowired
-    private ResidentService residentService;
-
     @RequestMapping("/api/wechat/test")
     public String test() {
         return "test";
@@ -116,10 +113,6 @@ public class WechatController {
 
         Set<Integer> userIds = new HashSet<>();
         userIds.add(user.getId());
-
-        if (residentService.queryByUserIds(userIds).size() == 0) {
-            wechatLogic.sendNotifyToAdmin(user);
-        }
     }
 
     @RequestMapping("/api/wechat/js_signature")

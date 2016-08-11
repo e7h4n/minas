@@ -82,4 +82,8 @@ public class WechatLogic {
 
         wechatService.templateSend(message);
     }
+
+    public void sendNotifyToAdmin(int userId) throws WxErrorException {
+        sendNotifyToAdmin(userService.get(userId));
+    }
 }

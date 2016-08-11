@@ -20,6 +20,7 @@ import com.jinyufeili.minas.crm.service.RoomService;
 import com.jinyufeili.minas.web.exception.BadRequestException;
 import com.jinyufeili.minas.web.exception.ConflictException;
 import com.jinyufeili.minas.web.exception.UnauthorizedException;
+import com.jinyufeili.minas.wechat.web.logic.WechatLogic;
 import me.chanjar.weixin.common.exception.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.WxMpTemplateData;
@@ -65,6 +66,9 @@ public class UserLogicImpl implements UserLogic {
 
     @Autowired
     private VerifyCodeService verifyCodeService;
+
+    @Autowired
+    private WechatLogic wechatLogic;
 
     @Override
     public UserVO getByAuthentication(Authentication authentication) {
@@ -241,17 +245,22 @@ public class UserLogicImpl implements UserLogic {
             }
         } else if (!phoneValid) { // 新用户第一次绑定必须验证码
             throw new BadRequestException("验证码输入错误");
+        } else {
+            Resident resident = new Resident();
+            resident.setMobilePhone(vo.getResident().getMobilePhone());
+            resident.setUserId(userId);
+            resident.setVerified(false);
+            resident.setRoomId(roomId);
+            resident.setName(vo.getResident().getName());
+            residentService.create(resident);
         }
 
-        Resident resident = new Resident();
-        resident.setMobilePhone(vo.getResident().getMobilePhone());
-        resident.setUserId(userId);
-        resident.setVerified(false);
-        resident.setRoomId(roomId);
-        resident.setName(vo.getResident().getName());
-        residentService.create(resident);
-
         verifyCodeService.clear();
+        try {
+            wechatLogic.sendNotifyToAdmin(userId);
+        } catch (WxErrorException e) {
+            LOG.error("", e);
+        }
 
         return get(userId);
     }
