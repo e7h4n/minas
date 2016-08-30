@@ -9,7 +9,6 @@ package com.jinyufeili.minas.account.web.ctrl;
 import com.jinyufeili.minas.account.data.GeetestConfig;
 import com.jinyufeili.minas.account.web.logic.GeetestLogic;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -21,8 +20,7 @@ public class GeetestController {
     @Autowired
     private GeetestLogic geetestLogic;
 
-    @RequestMapping("/api/geetest/config")
-    public GeetestConfig post() {
+    public GeetestConfig get() {
         return geetestLogic.register();
     }
 }
