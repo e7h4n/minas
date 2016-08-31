@@ -78,7 +78,7 @@ public class WechatLogic {
         message.getDatas().add(new WxMpTemplateData("keyword1", user.getName()));
         message.getDatas().add(new WxMpTemplateData("keyword2", new Date().toString()));
         message.getDatas().add(new WxMpTemplateData("remark", "点击进入审批页面"));
-        message.setUrl(String.format("https://m.jinyufeili.com/#/users/bind?userId=%d", user.getId()));
+        message.setUrl(String.format("https://m.jinyufeili.com/#/users/%d", user.getId()));
 
         wechatService.templateSend(message);
     }
