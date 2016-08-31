@@ -48,10 +48,13 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
 
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy年M月d日 H点mm分");
         List<String> messages = new ArrayList<>();
+
         messages.add(String.format("%s", formatter.format(new Date(temperature.getTimestamp()))));
-        messages.add(String.format("温度: %.1f℃", temperature.getValue()));
-        messages.add(String.format("湿度: %.1f%%", humidity.getValue()));
-        messages.add(String.format("气压: %.0fhPa", pressure.getValue() / 100.0));
+        messages.add(String.format("温湿度: %.1f℃ / %.1f%%", temperature.getValue(), humidity.getValue()));
+
+        if (ArrayUtils.indexOf(HOME_USERS, message.getFromUserName()) != -1) {
+            messages.add(String.format("气压: %.0fhPa", pressure.getValue() / 100.0));
+        }
 
         if (System.currentTimeMillis() - pm25.getTimestamp() < ALLOWED_LAG) {
             double average =
@@ -82,15 +85,13 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
             DataPoint temperatureHome = dataPointService.query(DataPointType.TEMPERATURE_HOME, 1).get(0);
             DataPoint humidityHome = dataPointService.query(DataPointType.HUMIDITY_HOME, 1).get(0);
             DataPoint pm25Home = dataPointService.query(DataPointType.PM25_HOME, 1).get(0);
-            messages.add(String.format("\n家里温度: %.1f℃", temperatureHome.getValue()));
-            messages.add(String.format("家里湿度: %.1f%%", humidityHome.getValue()));
+
+            messages.add("\n家里");
+            messages.add(String.format("温湿度: %.1f℃ / %.1f%%", temperatureHome.getValue(), humidityHome.getValue()));
             if (System.currentTimeMillis() - pm25Home.getTimestamp() < ALLOWED_LAG) {
-                messages.add(String.format("家里PM2.5: %.0fug/m^3", pm25Home.getValue()));
+                messages.add(String.format("PM2.5: %.0fug/m^3", pm25Home.getValue()));
             }
         }
-
-        messages.add("\n<a href=\"http://air.jinyufeili.com\">小区24小时空气质量</a>");
-        messages.add("\n--------\n注: \n* 温湿度为实时数据\n* PM2.5 数据为10分钟滑动平均值\n* 采样点位于铂庭二区");
 
         return String.join("\n", messages);
     }
