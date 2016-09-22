@@ -1,0 +1,137 @@
+/**
+ * @(#)${FILE_NAME}.java, 22/09/2016.
+ * <p/>
+ * Copyright 2016 fenbi.com. All rights reserved.
+ * FENBI.COM PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ */
+package com.jinyufeili.minas.wechat.cron;
+
+import com.jinyufeili.minas.account.data.User;
+import com.jinyufeili.minas.account.service.UserService;
+import com.jinyufeili.minas.crm.data.UserConfigType;
+import com.jinyufeili.minas.crm.storage.UserConfigStorage;
+import com.jinyufeili.minas.sensor.data.DataPoint;
+import com.jinyufeili.minas.sensor.data.DataPointType;
+import com.jinyufeili.minas.sensor.data.Notification;
+import com.jinyufeili.minas.sensor.data.NotificationType;
+import com.jinyufeili.minas.sensor.service.DataPointService;
+import com.jinyufeili.minas.sensor.storage.NotificationStorage;
+import com.jinyufeili.minas.wechat.data.AqiLevel;
+import com.jinyufeili.minas.wechat.service.WechatService;
+import com.jinyufeili.minas.wechat.util.AqiUtils;
+import me.chanjar.weixin.common.exception.WxErrorException;
+import me.chanjar.weixin.mp.bean.WxMpTemplateData;
+import me.chanjar.weixin.mp.bean.WxMpTemplateMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * @author pw
+ */
+@Component
+public class WeatcherNotificationJob {
+
+    private static final long DATA_EXPIRE_TIME = TimeUnit.MINUTES.toMillis(10000);
+
+    private static final double THRESHOLD = 40.0;
+
+    @Autowired
+    private UserService userService;
+
+    private Logger LOG = LoggerFactory.getLogger(this.getClass());
+
+    @Autowired
+    private DataPointService dataPointService;
+
+    @Autowired
+    private NotificationStorage notificationStorage;
+
+    private long MIN_NOTIFICATION_DURATION = TimeUnit.HOURS.toMillis(1);
+
+    private int MIN_HOUR = 8;
+
+    private int MAX_HOUR = 22;
+
+    @Autowired
+    private WechatService wechatService;
+
+    @Autowired
+    private UserConfigStorage userConfigStorage;
+
+    @Scheduled(cron = "0 * * * * *")
+    public void update() {
+
+        Calendar calendar = new GregorianCalendar();
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        if (hour < MIN_HOUR || hour >= MAX_HOUR) {
+            LOG.info("silent when night");
+            return;
+        }
+
+        List<DataPoint> dataPoints = dataPointService.query(DataPointType.PM25, 1);
+        if (dataPoints.size() == 0) {
+            LOG.info("no data points found");
+            return;
+        }
+
+        DataPoint latestDataPoint = dataPoints.get(0);
+        if (System.currentTimeMillis() - latestDataPoint.getTimestamp() > DATA_EXPIRE_TIME) {
+            LOG.info("data expired");
+            return;
+        }
+
+        Optional<Notification> notificationOpt = notificationStorage.getLatestByType(NotificationType.PM25);
+        boolean flag = latestDataPoint.getValue() > THRESHOLD;
+        //        if (notificationOpt.isPresent() && flag == notificationOpt.get().getFlag()) {
+        if (notificationOpt.isPresent() && flag == notificationOpt.get().getFlag()) {
+            LOG.info("nothing to notify");
+            return;
+        }
+
+        if (notificationOpt.isPresent() &&
+                System.currentTimeMillis() - notificationOpt.get().getCreatedTime() < MIN_NOTIFICATION_DURATION) {
+            LOG.info("notification too fast, just wait a moment");
+            return;
+        }
+
+        List<Integer> userIds = userConfigStorage.queryAllNot(UserConfigType.PM25_NOTIFICATION, "-1");
+
+        SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date now = new Date();
+        String time = sdfDate.format(now);
+        String advice = flag ? "\uD83D\uDE37 小区空气有点脏，请注意关窗净化。" : "\uD83D\uDE00 小区空气很好，可以开窗透气。";
+        AqiLevel aqi = AqiUtils.getAqi(AqiLevel.US_AQI_LEVELS, latestDataPoint.getValue());
+        String remark = String.format("当前浓度：%dug/m^3\n美标评级：%s", Math.round(latestDataPoint.getValue()), aqi.getName());
+
+        userIds.forEach(id -> {
+            User user = userService.get(id);
+            user.getOpenId();
+
+            WxMpTemplateMessage message = new WxMpTemplateMessage();
+            message.setToUser(user.getOpenId());
+            message.setTemplateId("8ttt8oMgKhALmtE349yjEFMHUtJUNGY-XFngPxG6z6s");
+            message.getDatas().add(new WxMpTemplateData("first", advice));
+            message.getDatas().add(new WxMpTemplateData("keyword1", "二区户外"));
+            message.getDatas().add(new WxMpTemplateData("keyword2", time));
+            message.getDatas().add(new WxMpTemplateData("remark", remark));
+
+            try {
+                wechatService.templateSend(message);
+            } catch (WxErrorException e) {
+                LOG.error("", e);
+            }
+        });
+
+        Notification notification = new Notification();
+        notification.setType(NotificationType.PM25);
+        notification.setFlag(flag);
+        this.notificationStorage.add(notification);
+    }
+}
