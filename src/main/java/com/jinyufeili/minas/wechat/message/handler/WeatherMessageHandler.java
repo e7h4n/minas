@@ -105,9 +105,9 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
             User user = userService.getByOpenId(message.getFromUserName());
             Optional<String> config = userConfigStorage.get(user.getId(), UserConfigType.PM25_NOTIFICATION);
             if (config.isPresent() && config.get().equals("1")) {
-                messages.add("\n已开启空气变化提醒。发送『关闭空气变化提醒』可以关闭该功能。");
+                messages.add("\n已开启空气变化提醒。发送『关闭空气提醒』可以关闭该功能。");
             } else {
-                messages.add("\n发送『关闭空气变化提醒』可以打开空气提醒功能。空气变化早知道，及时关窗更健康。");
+                messages.add("\n发送『打开空气提醒』可以打开空气提醒功能。空气变化早知道，及时关窗更健康。");
             }
         } catch (EmptyResultDataAccessException e) {
             LOG.info("guest can't use air notification. wechatOpenId={}", message.getFromUserName());

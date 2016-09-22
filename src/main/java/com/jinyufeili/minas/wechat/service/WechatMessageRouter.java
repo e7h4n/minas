@@ -80,7 +80,7 @@ public class WechatMessageRouter extends WxMpMessageRouter {
                 .rule()
                 .async(false)
                 .msgType(WxConsts.XML_MSG_TEXT)
-                .content("打开空气变化提醒")
+                .content("打开空气提醒")
                 .handler(enableSensorNotificationHandler)
                 .end()
 
@@ -88,7 +88,7 @@ public class WechatMessageRouter extends WxMpMessageRouter {
                 .rule()
                 .async(false)
                 .msgType(WxConsts.XML_MSG_TEXT)
-                .content("关闭空气变化提醒")
+                .content("关闭空气提醒")
                 .handler(disableSensorNotificationHandler)
                 .end()
 
