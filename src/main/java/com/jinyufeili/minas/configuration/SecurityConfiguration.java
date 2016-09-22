@@ -27,9 +27,6 @@ import org.springframework.security.web.authentication.rememberme.TokenBasedReme
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    private Http401AuthenticationEntryPoint authEntryPoint;
-
-    @Autowired
     private UserServiceImpl userService;
 
     @Autowired
@@ -41,9 +38,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private Http401AuthenticationEntryPoint entryPoint;
+
     @Bean
     public Http401AuthenticationEntryPoint http401AuthenticationEntryPoint() {
-        return new Http401AuthenticationEntryPoint("the realm");
+        return new Http401AuthenticationEntryPoint("cookie");
     }
 
     @Bean
@@ -86,9 +86,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                         "/api/wechat/handler",
                         "/api/sensor/**"
                 )
-                .permitAll().anyRequest().authenticated().and().exceptionHandling()
-                .authenticationEntryPoint(authEntryPoint).and().sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                .permitAll().anyRequest().authenticated()
+                .and().exceptionHandling()
+                .and().sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and().exceptionHandling().authenticationEntryPoint(entryPoint);
     }
 
     @Configuration

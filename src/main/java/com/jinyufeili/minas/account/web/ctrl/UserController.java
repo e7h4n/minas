@@ -10,10 +10,14 @@ import com.jinyufeili.minas.account.service.VerifyCodeService;
 import com.jinyufeili.minas.account.web.data.UserVO;
 import com.jinyufeili.minas.account.web.logic.UserLogic;
 import com.jinyufeili.minas.web.exception.BadRequestException;
+import com.jinyufeili.minas.web.exception.ForbiddenException;
 import com.jinyufeili.minas.web.exception.UnauthorizedException;
+import com.qiniu.util.Auth;
+import com.thoughtworks.xstream.security.ForbiddenClassException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestWrapper;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -43,8 +47,11 @@ public class UserController {
     }
 
     @RequestMapping("/api/users/{userId}")
-    @PreAuthorize("hasRole('筹备组')")
-    public UserVO get(@PathVariable int userId) {
+    public UserVO get(@PathVariable int userId, Authentication authentication, HttpServletRequest request) {
+        if (userId != userLogic.getByAuthentication(authentication).getId() && !request.isUserInRole("筹备组")) {
+            throw new ForbiddenException();
+        }
+
         return userLogic.get(userId);
     }
 
