@@ -12,6 +12,7 @@ import com.jinyufeili.minas.crm.data.UserConfigType;
 import com.jinyufeili.minas.crm.storage.UserConfigStorage;
 import me.chanjar.weixin.mp.bean.WxMpXmlMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -30,7 +31,12 @@ public class DisableSensorNotificationHandler extends AbstractTextResponseMessag
 
     @Override
     protected String generateTextMessage(WxMpXmlMessage message, Map<String, Object> context) {
-        User user = userService.getByOpenId(message.getFromUserName());
+        User user;
+        try {
+            user = userService.getByOpenId(message.getFromUserName());
+        } catch (EmptyResultDataAccessException e) {
+            return "此功能仅对小区内业主开放，请先点击『我的社区』进行身份验证。";
+        }
 
         userConfigStorage.set(user.getId(), UserConfigType.PM25_NOTIFICATION, "-1");
 

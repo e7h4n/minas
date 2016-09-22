@@ -12,6 +12,7 @@ import com.jinyufeili.minas.crm.data.UserConfigType;
 import com.jinyufeili.minas.crm.storage.UserConfigStorage;
 import me.chanjar.weixin.mp.bean.WxMpXmlMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -30,11 +31,15 @@ public class EnableSensorNotificationHandler extends AbstractTextResponseMessage
 
     @Override
     protected String generateTextMessage(WxMpXmlMessage message, Map<String, Object> context) {
-        User user = userService.getByOpenId(message.getFromUserName());
+        User user;
+        try {
+            user = userService.getByOpenId(message.getFromUserName());
+        } catch (EmptyResultDataAccessException e) {
+            return "此功能仅对小区内业主开放，请先点击『我的社区』进行身份验证。";
+        }
 
         userConfigStorage.set(user.getId(), UserConfigType.PM25_NOTIFICATION, "1");
 
-        return "空气变化提醒已打开。\n\n" +
-                "为了防止信息过多造成干扰，翡丽社区只会在每天 8:00 - 22: 00 之间，当空气质量发生明显变化时发送提醒。且每小时最多发送一条提醒。";
+        return "空气变化提醒已打开。\n\n" + "为了防止信息过多造成干扰，翡丽社区只会在每天 8:00 - 22: 00 之间，当空气质量发生明显变化时发送提醒。且每小时最多发送一条提醒。";
     }
 }
