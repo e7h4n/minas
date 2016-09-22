@@ -133,5 +133,7 @@ public class WeatcherNotificationJob {
         notification.setType(NotificationType.PM25);
         notification.setFlag(flag);
         this.notificationStorage.add(notification);
+
+        LOG.info("air notification sent to {} users", userIds.size());
     }
 }
