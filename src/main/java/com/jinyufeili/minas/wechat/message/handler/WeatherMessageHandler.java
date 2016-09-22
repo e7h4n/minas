@@ -6,6 +6,10 @@
  */
 package com.jinyufeili.minas.wechat.message.handler;
 
+import com.jinyufeili.minas.account.data.User;
+import com.jinyufeili.minas.account.service.UserService;
+import com.jinyufeili.minas.crm.data.UserConfigType;
+import com.jinyufeili.minas.crm.storage.UserConfigStorage;
 import com.jinyufeili.minas.sensor.data.DataPoint;
 import com.jinyufeili.minas.sensor.data.DataPointType;
 import com.jinyufeili.minas.sensor.service.DataPointService;
@@ -16,13 +20,11 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author pw
@@ -38,6 +40,12 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
 
     @Autowired
     private DataPointService dataPointService;
+
+    @Autowired
+    private UserConfigStorage userConfigStorage;
+
+    @Autowired
+    private UserService userService;
 
     @Override
     protected String generateTextMessage(WxMpXmlMessage message, Map<String, Object> context) {
@@ -91,6 +99,18 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
             if (System.currentTimeMillis() - pm25Home.getTimestamp() < ALLOWED_LAG) {
                 messages.add(String.format("PM2.5: %.0fug/m^3", pm25Home.getValue()));
             }
+        }
+
+        try {
+            User user = userService.getByOpenId(message.getFromUserName());
+            Optional<String> config = userConfigStorage.get(user.getId(), UserConfigType.PM25_NOTIFICATION);
+            if (config.isPresent() && config.get().equals("1")) {
+                messages.add("\n已开启空气变化提醒。发送『关闭空气变化提醒』可以关闭该功能。");
+            } else {
+                messages.add("\n发送『关闭空气变化提醒』可以打开空气提醒功能。空气变化早知道，及时关窗更健康。");
+            }
+        } catch (EmptyResultDataAccessException e) {
+            LOG.info("guest can't use air notification. wechatOpenId={}", message.getFromUserName());
         }
 
         return String.join("\n", messages);

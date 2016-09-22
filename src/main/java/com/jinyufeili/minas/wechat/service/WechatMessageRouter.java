@@ -35,6 +35,12 @@ public class WechatMessageRouter extends WxMpMessageRouter {
     @Autowired
     private NotFoundMessageHandler notFoundMessageHandler;
 
+    @Autowired
+    private EnableSensorNotificationHandler enableSensorNotificationHandler;
+
+    @Autowired
+    private DisableSensorNotificationHandler disableSensorNotificationHandler;
+
     public WechatMessageRouter(WxMpService wxMpService) {
         super(wxMpService);
     }
@@ -69,6 +75,21 @@ public class WechatMessageRouter extends WxMpMessageRouter {
                 .event(WxConsts.EVT_CLICK)
                 .interceptor(informationMessageInterceptor)
                 .handler(informationMessageHandler)
+                .end()
+
+                .rule()
+                .async(false)
+                .msgType(WxConsts.XML_MSG_TEXT)
+                .content("打开空气变化提醒")
+                .handler(enableSensorNotificationHandler)
+                .end()
+
+
+                .rule()
+                .async(false)
+                .msgType(WxConsts.XML_MSG_TEXT)
+                .content("关闭空气变化提醒")
+                .handler(disableSensorNotificationHandler)
                 .end()
 
                 .rule()
