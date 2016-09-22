@@ -84,6 +84,12 @@ public class WechatMessageRouter extends WxMpMessageRouter {
                 .handler(enableSensorNotificationHandler)
                 .end()
 
+                .rule()
+                .async(false)
+                .msgType(WxConsts.XML_MSG_TEXT)
+                .content("开启空气提醒")
+                .handler(enableSensorNotificationHandler)
+                .end()
 
                 .rule()
                 .async(false)
