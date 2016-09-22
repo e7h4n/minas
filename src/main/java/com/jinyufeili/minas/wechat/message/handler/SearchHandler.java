@@ -51,10 +51,15 @@ public class SearchHandler implements WxMpMessageHandler {
         List<WxMpMaterialNews.WxMpMaterialNewsArticle> articles = articleDirectory.search(messageContent);
 
         if (CollectionUtils.isEmpty(articles)) {
+            String retMsg;
             if (wxMessage.getContent().length() < 5) {
-                return WxMpXmlOutTextMessage.TEXT().content(String.format("没有找到到关于\"%s\"的内容", wxMessage.getContent()))
-                        .fromUser(wxMessage.getToUserName()).toUser(wxMessage.getFromUserName()).build();
+                retMsg = String.format("没有找到到关于\"%s\"的内容", wxMessage.getContent());
+            } else {
+                retMsg = String.format("\"%s\"是什么，我不懂", wxMessage.getContent());
             }
+
+            return WxMpXmlOutTextMessage.TEXT().content(retMsg)
+                    .fromUser(wxMessage.getToUserName()).toUser(wxMessage.getFromUserName()).build();
         }
 
         NewsBuilder newsBuilder = WxMpXmlOutMessage.NEWS();
@@ -70,7 +75,8 @@ public class SearchHandler implements WxMpMessageHandler {
         newsBuilder.toUser(wxMessage.getFromUserName());
         newsBuilder.fromUser(wxMessage.getToUserName());
 
+        LOG.info("return search result for query={}", messageContent);
+
         return newsBuilder.build();
     }
-
 }

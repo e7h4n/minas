@@ -109,6 +109,7 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
             } else {
                 messages.add("\n发送『打开空气提醒』可以打开空气提醒功能。空气变化早知道，及时关窗更健康。");
             }
+            LOG.info("return pm25 message for user, userId={}, userName={}", user.getId(), user.getName());
         } catch (EmptyResultDataAccessException e) {
             LOG.info("guest can't use air notification. wechatOpenId={}", message.getFromUserName());
         }
