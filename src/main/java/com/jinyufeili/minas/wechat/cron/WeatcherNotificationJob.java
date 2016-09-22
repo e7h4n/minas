@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class WeatcherNotificationJob {
 
-    private static final long DATA_EXPIRE_TIME = TimeUnit.MINUTES.toMillis(10000);
+    private static final long DATA_EXPIRE_TIME = TimeUnit.MINUTES.toMillis(10);
 
     private static final double THRESHOLD = 40.0;
 
