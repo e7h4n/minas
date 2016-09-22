@@ -104,7 +104,7 @@ public class WeatcherNotificationJob {
         List<Integer> userIds = userConfigStorage.queryAllNot(UserConfigType.PM25_NOTIFICATION, "-1");
 
         SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date now = new Date();
+        Date now = new Date(latestDataPoint.getTimestamp());
         String time = sdfDate.format(now);
         String advice = flag ? "\uD83D\uDE37 小区空气有点脏，请注意关窗净化。" : "\uD83D\uDE00 小区空气很好，可以开窗透气。";
         AqiLevel aqi = AqiUtils.getAqi(AqiLevel.US_AQI_LEVELS, latestDataPoint.getValue());
