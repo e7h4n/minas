@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
  * @author pw
  */
 @Component
-public class WeatcherNotificationJob {
+public class WeatherNotificationJob {
 
     private static final long DATA_EXPIRE_TIME = TimeUnit.MINUTES.toMillis(10);
 
@@ -65,7 +65,7 @@ public class WeatcherNotificationJob {
     @Autowired
     private UserConfigStorage userConfigStorage;
 
-    @Scheduled(cron = "0 * * * * *")
+    @Scheduled(cron = "0 */10 * * * *")
     public void update() {
 
         Calendar calendar = new GregorianCalendar();
@@ -88,16 +88,17 @@ public class WeatcherNotificationJob {
         }
 
         Optional<Notification> notificationOpt = notificationStorage.getLatestByType(NotificationType.PM25);
-        boolean flag = latestDataPoint.getValue() > THRESHOLD;
-        //        if (notificationOpt.isPresent() && flag == notificationOpt.get().getFlag()) {
-        if (notificationOpt.isPresent() && flag == notificationOpt.get().getFlag()) {
-            LOG.info("nothing to notify");
-            return;
-        }
-
         if (notificationOpt.isPresent() &&
                 System.currentTimeMillis() - notificationOpt.get().getCreatedTime() < MIN_NOTIFICATION_DURATION) {
             LOG.info("notification too fast, just wait a moment");
+            return;
+        }
+
+        List<DataPoint> averagePoints = dataPointService.query(DataPointType.PM25, 5);
+        double averageValue = averagePoints.stream().mapToDouble(DataPoint::getValue).average().getAsDouble();
+        boolean flag = averageValue > THRESHOLD;
+        if (notificationOpt.isPresent() && flag == notificationOpt.get().getFlag()) {
+            LOG.info("nothing to notify");
             return;
         }
 
@@ -107,8 +108,8 @@ public class WeatcherNotificationJob {
         Date now = new Date(latestDataPoint.getTimestamp());
         String time = sdfDate.format(now);
         String advice = flag ? "\uD83D\uDE37 小区空气有点脏，请注意关窗净化。" : "\uD83D\uDE00 小区空气很好，可以开窗透气。";
-        AqiLevel aqi = AqiUtils.getAqi(AqiLevel.US_AQI_LEVELS, latestDataPoint.getValue());
-        String remark = String.format("当前浓度：%dug/m^3\n美标评级：%s", Math.round(latestDataPoint.getValue()), aqi.getName());
+        AqiLevel aqi = AqiUtils.getAqi(AqiLevel.US_AQI_LEVELS, averageValue);
+        String remark = String.format("当前浓度：%dug/m^3\n美标评级：%s", Math.round(averageValue), aqi.getName());
 
         userIds.forEach(id -> {
             User user = userService.get(id);
