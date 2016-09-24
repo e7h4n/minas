@@ -31,6 +31,7 @@ public class NotificationStorage {
         notification.setId(rs.getInt("id"));
         notification.setType(NotificationType.findByInt(rs.getInt("type")));
         notification.setFlag(rs.getBoolean("flag"));
+        notification.setCreatedTime(rs.getLong("createdTime"));
 
         return notification;
     });
