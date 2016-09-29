@@ -93,11 +93,17 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
             DataPoint temperatureHome = dataPointService.query(DataPointType.TEMPERATURE_HOME, 1).get(0);
             DataPoint humidityHome = dataPointService.query(DataPointType.HUMIDITY_HOME, 1).get(0);
             DataPoint pm25Home = dataPointService.query(DataPointType.PM25_HOME, 1).get(0);
+            DataPoint formaldehydeHome = dataPointService.query(DataPointType.FORMALDEHYDE_HOME, 1).get(0);
 
             messages.add("\n家里");
             messages.add(String.format("温湿度: %.1f℃ / %.1f%%", temperatureHome.getValue(), humidityHome.getValue()));
+
             if (System.currentTimeMillis() - pm25Home.getTimestamp() < ALLOWED_LAG) {
                 messages.add(String.format("PM2.5: %.0fug/m^3", pm25Home.getValue()));
+            }
+
+            if (System.currentTimeMillis() - formaldehydeHome.getTimestamp() < ALLOWED_LAG) {
+                messages.add(String.format("甲醛: %.3fmg/m^3", formaldehydeHome.getValue() / 1000.0));
             }
         }
 
