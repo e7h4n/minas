@@ -19,7 +19,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 
@@ -31,6 +33,9 @@ public class LuceneConfiguration {
 
     @Value("${lucene.directory}")
     private String luceneDirectory;
+
+    @Value("${jcseg.lexiconPath}")
+    private String lexiconPath;
 
     private Logger LOG = LoggerFactory.getLogger(this.getClass());
 
@@ -46,12 +51,25 @@ public class LuceneConfiguration {
     }
 
     @Bean
-    public ADictionary aDictionary(JcsegTaskConfig taskConfig) {
-        return DictionaryFactory.createDefaultDictionary(taskConfig, false);
+    public ADictionary aDictionary(JcsegTaskConfig taskConfig) throws IOException {
+        ADictionary dictionary = DictionaryFactory.createDefaultDictionary(taskConfig, false);
+        if (lexiconPath.startsWith("classpath:")) {
+            String resourcePath = lexiconPath.replace("classpath:", "");
+            dictionary.load(getResourceAsStream(resourcePath));
+        } else if (lexiconPath.startsWith("file:")) {
+            String pathname = lexiconPath.replace("file:", "");
+            dictionary.load(new File(pathname));
+        }
+        
+        return dictionary;
     }
 
     @Bean
     public Analyzer analyzer(JcsegTaskConfig config, ADictionary dictionary) throws IOException {
         return new JcsegAnalyzer5X(JcsegTaskConfig.COMPLEX_MODE, config, dictionary);
+    }
+
+    private InputStream getResourceAsStream(String lexicon) {
+        return this.getClass().getClassLoader().getResourceAsStream(lexicon);
     }
 }

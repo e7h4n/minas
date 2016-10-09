@@ -108,7 +108,7 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
             }
 
             if (System.currentTimeMillis() - co2Home.getTimestamp() < ALLOWED_LAG) {
-                messages.add(String.format("CO2: %.0f/ppm", co2Home.getValue()));
+                messages.add(String.format("CO2: %.0f ppm", co2Home.getValue()));
             }
         }
 
