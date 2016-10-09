@@ -4,7 +4,7 @@
  * Copyright 2016 fenbi.com. All rights reserved.
  * FENBI.COM PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  */
-package com.jinyufeili.minas.wechat.job;
+package com.jinyufeili.minas.wechat.cron;
 
 import com.jinyufeili.minas.account.data.User;
 import com.jinyufeili.minas.account.service.UserService;
@@ -14,6 +14,7 @@ import me.chanjar.weixin.common.exception.WxErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -27,6 +28,7 @@ import java.util.List;
  * @author pw
  */
 @Component
+@ConditionalOnProperty(value = "cron.syncWechatUserInfo", matchIfMissing = true)
 public class SyncWechatUserInfoJob {
 
     private final Logger LOG = LoggerFactory.getLogger(this.getClass());

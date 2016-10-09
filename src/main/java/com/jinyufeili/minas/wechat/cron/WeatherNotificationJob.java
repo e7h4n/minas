@@ -25,6 +25,7 @@ import me.chanjar.weixin.mp.bean.WxMpTemplateMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -36,6 +37,7 @@ import java.util.concurrent.TimeUnit;
  * @author pw
  */
 @Component
+@ConditionalOnProperty(value = "cron.weatherNotification", matchIfMissing = true)
 public class WeatherNotificationJob {
 
     private static final long DATA_EXPIRE_TIME = TimeUnit.MINUTES.toMillis(10);
@@ -64,6 +66,8 @@ public class WeatherNotificationJob {
 
     @Autowired
     private UserConfigStorage userConfigStorage;
+
+    private double MIN_FLAG_GAP = 5;
 
     @Scheduled(cron = "0 */10 * * * *")
     public void update() {
@@ -97,9 +101,17 @@ public class WeatherNotificationJob {
         List<DataPoint> averagePoints = dataPointService.query(DataPointType.PM25, 5);
         double averageValue = averagePoints.stream().mapToDouble(DataPoint::getValue).average().getAsDouble();
         boolean flag = averageValue > THRESHOLD;
-        if (notificationOpt.isPresent() && flag == notificationOpt.get().getFlag()) {
-            LOG.info("nothing to notify");
-            return;
+        if (notificationOpt.isPresent()) {
+            boolean lastFlag = notificationOpt.get().getFlag();
+            if (flag == lastFlag) {
+                LOG.info("nothing to notify");
+                return;
+            }
+
+            if (Math.abs(averageValue - THRESHOLD) < MIN_FLAG_GAP) {
+                LOG.info("flag gap is too small");
+                return;
+            }
         }
 
         List<Integer> userIds = userConfigStorage.queryAllNot(UserConfigType.PM25_NOTIFICATION, "-1");

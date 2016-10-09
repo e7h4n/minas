@@ -16,6 +16,7 @@ import me.chanjar.weixin.mp.api.WxMpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -27,6 +28,7 @@ import java.util.OptionalDouble;
  * @author pw
  */
 @Component
+@ConditionalOnProperty(value = "cron.weatherMenuUpdate", matchIfMissing = true)
 public class WechatMenuUpdateJob {
 
     private final Logger LOG = LoggerFactory.getLogger(this.getClass());

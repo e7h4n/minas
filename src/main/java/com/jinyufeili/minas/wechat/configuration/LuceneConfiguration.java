@@ -60,7 +60,7 @@ public class LuceneConfiguration {
             String pathname = lexiconPath.replace("file:", "");
             dictionary.load(new File(pathname));
         }
-        
+
         return dictionary;
     }
 

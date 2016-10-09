@@ -18,6 +18,7 @@ import me.chanjar.weixin.mp.bean.result.WxMpUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
  * @author pw
  */
 @Component
+@ConditionalOnProperty(value = "cron.wechatUserInfoUpdate", matchIfMissing = true)
 public class WechatUserInfoUpdateJob {
 
     private final Logger LOG = LoggerFactory.getLogger(this.getClass());

@@ -33,9 +33,6 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     @Autowired
     private UserGroupStorage userGroupStorage;
 
-    @Autowired
-    private WxMpService wechatService;
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user;
@@ -107,7 +104,8 @@ public class UserServiceImpl implements UserDetailsService, UserService {
                 .map(g -> new SimpleGrantedAuthority("ROLE_" + g.getName())).collect(Collectors.toSet());
     }
 
-    private List<User> queryByName(String name) {
+    @Override
+    public List<User> queryByName(String name) {
         return userStorage.queryByName(name);
     }
 }

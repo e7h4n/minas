@@ -35,4 +35,6 @@ public interface UserService {
     List<Integer> getUserIds(int cursor, int limit);
 
     boolean remove(int id);
+
+    List<User> queryByName(String nickName);
 }
