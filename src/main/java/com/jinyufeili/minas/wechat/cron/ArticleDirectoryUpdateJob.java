@@ -40,7 +40,7 @@ public class ArticleDirectoryUpdateJob {
     @Autowired
     private IndexWriter indexWriter;
 
-    @Scheduled(cron = "0 * * * * *")
+    @Scheduled(cron = "0 */10 * * * *")
     public void updateDirectory() throws WxErrorException, IOException {
         WxMpMaterialCountResult materialCount = wechatService.materialCount();
         int newsCount = materialCount.getNewsCount();
