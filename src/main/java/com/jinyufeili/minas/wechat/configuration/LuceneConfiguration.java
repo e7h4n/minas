@@ -7,6 +7,8 @@
 package com.jinyufeili.minas.wechat.configuration;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.NIOFSDirectory;
 import org.lionsoul.jcseg.analyzer.v5x.JcsegAnalyzer5X;
@@ -67,6 +69,11 @@ public class LuceneConfiguration {
     @Bean
     public Analyzer analyzer(JcsegTaskConfig config, ADictionary dictionary) throws IOException {
         return new JcsegAnalyzer5X(JcsegTaskConfig.COMPLEX_MODE, config, dictionary);
+    }
+
+    @Bean
+    public IndexWriter indexWriter(Directory directory, Analyzer analyzer) throws IOException {
+        return new IndexWriter(directory, new IndexWriterConfig(analyzer));
     }
 
     private InputStream getResourceAsStream(String lexicon) {

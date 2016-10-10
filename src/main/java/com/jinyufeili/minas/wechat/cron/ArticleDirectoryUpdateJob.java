@@ -12,12 +12,9 @@ import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.WxMpMaterialNews;
 import me.chanjar.weixin.mp.bean.result.WxMpMaterialCountResult;
 import me.chanjar.weixin.mp.bean.result.WxMpMaterialNewsBatchGetResult;
-import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.store.Directory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,16 +38,12 @@ public class ArticleDirectoryUpdateJob {
     private WxMpService wechatService;
 
     @Autowired
-    private Directory directory;
+    private IndexWriter indexWriter;
 
-    @Autowired
-    private Analyzer analyzer;
-
-    @Scheduled(cron = "0 */10 * * * *")
+    @Scheduled(cron = "0 * * * * *")
     public void updateDirectory() throws WxErrorException, IOException {
         WxMpMaterialCountResult materialCount = wechatService.materialCount();
         int newsCount = materialCount.getNewsCount();
-        IndexWriter writer = new IndexWriter(directory, new IndexWriterConfig(analyzer));
 
         for (int i = 0; i < newsCount; i += 100) {
             WxMpMaterialNewsBatchGetResult newsList = wechatService.materialNewsBatchGet(i, 100);
@@ -67,11 +60,13 @@ public class ArticleDirectoryUpdateJob {
                     doc.add(new StringField(ArticleDirectory.FIELD_MEDIA_ID, materialNews.getMediaId(),
                             Field.Store.YES));
                     doc.add(new TextField(ArticleDirectory.FIELD_CONTENT, article.getContent(), Field.Store.YES));
-                    writer.updateDocument(new Term("id", String.format("%s_%d", materialNews.getMediaId(), j)), doc);
+                    indexWriter
+                            .updateDocument(new Term("id", String.format("%s_%d", materialNews.getMediaId(), j)), doc);
                     LOG.info("add doc, mediaId={}, index={}", materialNews.getMediaId(), j);
                 }
             }
         }
-        writer.close();
+
+        indexWriter.commit();
     }
 }
