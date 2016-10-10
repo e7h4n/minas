@@ -9,9 +9,8 @@ package com.jinyufeili.minas.configuration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
-
-import java.util.concurrent.Executors;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 /**
  * @author pw
@@ -21,6 +20,20 @@ public class SpringConfiguration {
 
     @Bean
     public TaskExecutor taskExecutor() {
-        return new ConcurrentTaskExecutor(Executors.newFixedThreadPool(3));
+        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setThreadGroupName("minas-executor-pool");
+        taskExecutor.setThreadNamePrefix("executor-task");
+        taskExecutor.setQueueCapacity(25);
+        taskExecutor.setMaxPoolSize(3);
+        return taskExecutor;
+    }
+
+    @Bean
+    public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
+        ThreadPoolTaskScheduler poolTaskScheduler = new ThreadPoolTaskScheduler();
+        poolTaskScheduler.setPoolSize(3);
+        poolTaskScheduler.setThreadNamePrefix("scheduled-task");
+        poolTaskScheduler.setThreadGroupName("minas-scheduler-pool");
+        return poolTaskScheduler;
     }
 }
