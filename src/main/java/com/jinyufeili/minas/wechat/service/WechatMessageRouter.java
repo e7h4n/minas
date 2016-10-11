@@ -63,7 +63,7 @@ public class WechatMessageRouter extends WxMpMessageRouter {
                 .end()
 
                 .rule()
-                .async(true)
+                .async(false)
                 .msgType(WxConsts.XML_MSG_EVENT)
                 .event(WxConsts.EVT_CLICK)
                 .eventKey("WEATHER")
