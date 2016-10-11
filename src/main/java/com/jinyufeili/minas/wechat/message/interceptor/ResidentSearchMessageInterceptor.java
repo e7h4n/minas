@@ -59,7 +59,7 @@ public class ResidentSearchMessageInterceptor extends AbstractRoleInterceptor {
             try {
                 room = roomService.getByAbbr(content);
             } catch (EmptyResultDataAccessException e) {
-                LOG.info("miss house abbr, fromUser={}, abbr={}", message.getFromUserName(), content);
+                LOG.info("miss house abbr, fromUser={}, abbr={}", message.getFromUser(), content);
             }
 
             if (room != null) {

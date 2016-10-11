@@ -276,10 +276,10 @@ public class UserLogicImpl implements UserLogic {
         message.setTemplateId("xs9cvsdgVcBCN3fDsDet2X9bJnmwOGn62dvbVqhFP-Y");
         message.setToUser(user.getOpenId());
         message.setUrl("https://m.jinyufeili.com");
-        message.getDatas().add(new WxMpTemplateData("first", "社区实名认证"));
-        message.getDatas().add(new WxMpTemplateData("keyword1", vo.getResident().getName()));
-        message.getDatas().add(new WxMpTemplateData("keyword2", "认证完成"));
-        message.getDatas().add(new WxMpTemplateData("remark", "您现在可以点击 \"我的社区\" 查看通过认证的个人信息"));
+        message.getData().add(new WxMpTemplateData("first", "社区实名认证"));
+        message.getData().add(new WxMpTemplateData("keyword1", vo.getResident().getName()));
+        message.getData().add(new WxMpTemplateData("keyword2", "认证完成"));
+        message.getData().add(new WxMpTemplateData("remark", "您现在可以点击 \"我的社区\" 查看通过认证的个人信息"));
         wechatService.templateSend(message);
     }
 }

@@ -8,7 +8,7 @@ package com.jinyufeili.minas.wechat.cron;
 
 import com.jinyufeili.minas.wechat.service.ArticleDirectory;
 import me.chanjar.weixin.common.exception.WxErrorException;
-import me.chanjar.weixin.mp.api.WxMpService;
+import me.chanjar.weixin.mp.api.WxMpMaterialService;
 import me.chanjar.weixin.mp.bean.WxMpMaterialNews;
 import me.chanjar.weixin.mp.bean.result.WxMpMaterialCountResult;
 import me.chanjar.weixin.mp.bean.result.WxMpMaterialNewsBatchGetResult;
@@ -35,18 +35,18 @@ public class ArticleDirectoryUpdateJob {
     private Logger LOG = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    private WxMpService wechatService;
+    private IndexWriter indexWriter;
 
     @Autowired
-    private IndexWriter indexWriter;
+    private WxMpMaterialService materialService;
 
     @Scheduled(cron = "0 */10 * * * *")
     public void updateDirectory() throws WxErrorException, IOException {
-        WxMpMaterialCountResult materialCount = wechatService.materialCount();
+        WxMpMaterialCountResult materialCount = materialService.materialCount();
         int newsCount = materialCount.getNewsCount();
 
         for (int i = 0; i < newsCount; i += 100) {
-            WxMpMaterialNewsBatchGetResult newsList = wechatService.materialNewsBatchGet(i, 100);
+            WxMpMaterialNewsBatchGetResult newsList = materialService.materialNewsBatchGet(i, 100);
             for (WxMpMaterialNewsBatchGetResult.WxMaterialNewsBatchGetNewsItem materialNews : newsList.getItems()) {
                 List<WxMpMaterialNews.WxMpMaterialNewsArticle> newsArticles = materialNews.getContent().getArticles();
                 for (int j = 0; j < newsArticles.size(); j++) {

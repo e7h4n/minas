@@ -35,6 +35,8 @@ import java.util.Set;
 @RestController
 public class WechatController {
 
+    public static final String EMPTY_MESSAGE_RESPONSE = "success";
+
     private Logger LOG = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
@@ -94,8 +96,7 @@ public class WechatController {
         WxMpXmlOutMessage outMessage = wechatMessageRouter.route(inMessage);
         if (outMessage == null) {
             LOG.warn("empty out message");
-            outMessage = WxMpXmlOutMessage.TEXT().content("").fromUser(inMessage.getToUserName())
-                    .toUser(inMessage.getFromUserName()).build();
+            return EMPTY_MESSAGE_RESPONSE;
         }
         return outMessage.toEncryptedXml(wechatConfig);
     }

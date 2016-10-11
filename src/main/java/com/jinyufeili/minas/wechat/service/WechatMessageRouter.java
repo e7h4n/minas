@@ -8,6 +8,7 @@ import me.chanjar.weixin.mp.api.WxMpService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Created by pw on 6/10/16.
@@ -41,6 +42,12 @@ public class WechatMessageRouter extends WxMpMessageRouter {
     @Autowired
     private DisableSensorNotificationHandler disableSensorNotificationHandler;
 
+    @Override
+    @Autowired
+    public void setExecutorService(ExecutorService executorService) {
+        super.setExecutorService(executorService);
+    }
+
     public WechatMessageRouter(WxMpService wxMpService) {
         super(wxMpService);
     }
@@ -56,7 +63,7 @@ public class WechatMessageRouter extends WxMpMessageRouter {
                 .end()
 
                 .rule()
-                .async(false)
+                .async(true)
                 .msgType(WxConsts.XML_MSG_EVENT)
                 .event(WxConsts.EVT_CLICK)
                 .eventKey("WEATHER")

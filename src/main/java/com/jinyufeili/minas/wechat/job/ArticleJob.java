@@ -6,7 +6,7 @@
  */
 package com.jinyufeili.minas.wechat.job;
 
-import me.chanjar.weixin.mp.api.WxMpService;
+import me.chanjar.weixin.mp.api.WxMpMaterialService;
 import me.chanjar.weixin.mp.bean.WxMpMaterialNews;
 import me.chanjar.weixin.mp.bean.result.WxMpMaterialNewsBatchGetResult;
 import org.slf4j.Logger;
@@ -26,11 +26,11 @@ public class ArticleJob implements CommandLineRunner {
     private Logger LOG = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    private WxMpService wechatService;
+    private WxMpMaterialService materialService;
 
     @Override
     public void run(String... args) throws Exception {
-        WxMpMaterialNewsBatchGetResult materialNews = wechatService.materialNewsBatchGet(0, 100);
+        WxMpMaterialNewsBatchGetResult materialNews = materialService.materialNewsBatchGet(0, 100);
         for (WxMpMaterialNewsBatchGetResult.WxMaterialNewsBatchGetNewsItem item : materialNews.getItems()) {
             LOG.info("mediaId={}", item.getMediaId());
             for (WxMpMaterialNews.WxMpMaterialNewsArticle article : item.getContent().getArticles()) {

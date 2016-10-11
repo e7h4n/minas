@@ -59,7 +59,7 @@ public class SearchHandler implements WxMpMessageHandler {
             }
 
             return WxMpXmlOutTextMessage.TEXT().content(retMsg)
-                    .fromUser(wxMessage.getToUserName()).toUser(wxMessage.getFromUserName()).build();
+                    .fromUser(wxMessage.getToUser()).toUser(wxMessage.getFromUser()).build();
         }
 
         NewsBuilder newsBuilder = WxMpXmlOutMessage.NEWS();
@@ -72,8 +72,8 @@ public class SearchHandler implements WxMpMessageHandler {
             LOG.info("add article {}", item);
             newsBuilder.addArticle(item);
         }
-        newsBuilder.toUser(wxMessage.getFromUserName());
-        newsBuilder.fromUser(wxMessage.getToUserName());
+        newsBuilder.toUser(wxMessage.getFromUser());
+        newsBuilder.fromUser(wxMessage.getToUser());
 
         LOG.info("return search result for query={}", messageContent);
 

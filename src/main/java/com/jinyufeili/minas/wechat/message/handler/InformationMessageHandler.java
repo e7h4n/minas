@@ -50,8 +50,8 @@ public class InformationMessageHandler extends AbstractTextResponseMessageHandle
                 newsBuilder.addArticle(item);
             }
 
-            newsBuilder.fromUser(wxMessage.getToUserName());
-            newsBuilder.toUser(wxMessage.getFromUserName());
+            newsBuilder.fromUser(wxMessage.getToUser());
+            newsBuilder.toUser(wxMessage.getFromUser());
 
             return newsBuilder.build();
         }

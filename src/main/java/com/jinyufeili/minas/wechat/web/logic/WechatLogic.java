@@ -74,10 +74,10 @@ public class WechatLogic {
         WxMpTemplateMessage message = new WxMpTemplateMessage();
         message.setToUser(admin.getOpenId());
         message.setTemplateId("0NTYqPHErV5rlcsBZ7xDOqxmkv6EnMOo4HylFkRAVlg");
-        message.getDatas().add(new WxMpTemplateData("first", "有新用户注册，请联系用户核实身份"));
-        message.getDatas().add(new WxMpTemplateData("keyword1", user.getName()));
-        message.getDatas().add(new WxMpTemplateData("keyword2", new Date().toString()));
-        message.getDatas().add(new WxMpTemplateData("remark", "点击进入审批页面"));
+        message.getData().add(new WxMpTemplateData("first", "有新用户注册，请联系用户核实身份"));
+        message.getData().add(new WxMpTemplateData("keyword1", user.getName()));
+        message.getData().add(new WxMpTemplateData("keyword2", new Date().toString()));
+        message.getData().add(new WxMpTemplateData("remark", "点击进入审批页面"));
         message.setUrl(String.format("https://m.jinyufeili.com/#/users/%d", user.getId()));
 
         wechatService.templateSend(message);

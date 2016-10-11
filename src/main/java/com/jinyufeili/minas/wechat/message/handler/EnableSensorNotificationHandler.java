@@ -35,7 +35,7 @@ public class EnableSensorNotificationHandler extends AbstractTextResponseMessage
     protected String generateTextMessage(WxMpXmlMessage message, Map<String, Object> context) {
         User user;
         try {
-            user = userService.getByOpenId(message.getFromUserName());
+            user = userService.getByOpenId(message.getFromUser());
         } catch (EmptyResultDataAccessException e) {
             return "此功能仅对小区内业主开放，请先点击『我的社区』进行身份验证。";
         }

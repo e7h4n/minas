@@ -6,10 +6,15 @@
  */
 package com.jinyufeili.minas.configuration;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.core.task.support.ExecutorServiceAdapter;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author pw
@@ -34,5 +39,11 @@ public class SpringConfiguration {
         poolTaskScheduler.setThreadNamePrefix("scheduled-task");
         poolTaskScheduler.setThreadGroupName("minas-scheduler-pool");
         return poolTaskScheduler;
+    }
+
+    @Bean
+    @Autowired
+    public ExecutorService executorService(TaskExecutor taskExecutor) {
+        return new ExecutorServiceAdapter(taskExecutor);
     }
 }

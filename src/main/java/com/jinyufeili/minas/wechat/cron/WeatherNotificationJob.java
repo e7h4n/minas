@@ -17,9 +17,9 @@ import com.jinyufeili.minas.sensor.data.NotificationType;
 import com.jinyufeili.minas.sensor.service.DataPointService;
 import com.jinyufeili.minas.sensor.storage.NotificationStorage;
 import com.jinyufeili.minas.wechat.data.AqiLevel;
-import com.jinyufeili.minas.wechat.service.WechatService;
 import com.jinyufeili.minas.wechat.util.AqiUtils;
 import me.chanjar.weixin.common.exception.WxErrorException;
+import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.WxMpTemplateData;
 import me.chanjar.weixin.mp.bean.WxMpTemplateMessage;
 import org.slf4j.Logger;
@@ -62,7 +62,7 @@ public class WeatherNotificationJob {
     private int MAX_HOUR = 22;
 
     @Autowired
-    private WechatService wechatService;
+    private WxMpService wxMpService;
 
     @Autowired
     private UserConfigStorage userConfigStorage;
@@ -130,13 +130,13 @@ public class WeatherNotificationJob {
             WxMpTemplateMessage message = new WxMpTemplateMessage();
             message.setToUser(user.getOpenId());
             message.setTemplateId("8ttt8oMgKhALmtE349yjEFMHUtJUNGY-XFngPxG6z6s");
-            message.getDatas().add(new WxMpTemplateData("first", advice));
-            message.getDatas().add(new WxMpTemplateData("keyword1", "二区户外"));
-            message.getDatas().add(new WxMpTemplateData("keyword2", time));
-            message.getDatas().add(new WxMpTemplateData("remark", remark));
+            message.getData().add(new WxMpTemplateData("first", advice));
+            message.getData().add(new WxMpTemplateData("keyword1", "二区户外"));
+            message.getData().add(new WxMpTemplateData("keyword2", time));
+            message.getData().add(new WxMpTemplateData("remark", remark));
 
             try {
-                wechatService.templateSend(message);
+                wxMpService.templateSend(message);
             } catch (WxErrorException e) {
                 LOG.error("", e);
             }

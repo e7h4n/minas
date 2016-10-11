@@ -8,6 +8,8 @@ import com.jinyufeili.minas.crm.storage.ResidentStorage;
 import com.jinyufeili.minas.crm.storage.RoomStorage;
 import me.chanjar.weixin.common.exception.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpService;
+import me.chanjar.weixin.mp.api.WxMpUserService;
+import me.chanjar.weixin.mp.api.WxMpUserTagService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +40,12 @@ public class ResidentServiceImpl implements ResidentService {
 
     @Autowired
     private WxMpService wechatService;
+
+    @Autowired
+    private WxMpUserService userService;
+
+    @Autowired
+    private WxMpUserTagService userTagService;
 
     @Override
     public List<Resident> queryByRoomId(int roomId) {
@@ -87,13 +95,15 @@ public class ResidentServiceImpl implements ResidentService {
         Room room = roomStorage.getByIds(Collections.singleton(resident.getRoomId())).get(resident.getRoomId());
         User user = userStorage.get(resident.getUserId());
 
-        wechatService.userUpdateGroup(user.getOpenId(), GROUP_ID);
+        userTagService
+                .batchTagging(TAG_ID, Collections.singletonList(user.getOpenId()).stream().toArray(String[]::new));
+
         if (room.getRegion() == 1) {
-            wechatService.userUpdateRemark(user.getOpenId(),
+            userService.userUpdateRemark(user.getOpenId(),
                     String.format("%d区 %d-%d %s", room.getRegion(), room.getBuilding(), room.getHouseNumber(),
                             resident.getName()));
         } else {
-            wechatService.userUpdateRemark(user.getOpenId(),
+            userService.userUpdateRemark(user.getOpenId(),
                     String.format("%d区 %d-%d-%d %s", room.getRegion(), room.getBuilding(), room.getUnit(),
                             room.getHouseNumber(), resident.getName()));
         }

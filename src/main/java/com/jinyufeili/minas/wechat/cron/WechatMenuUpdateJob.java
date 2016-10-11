@@ -10,14 +10,15 @@ import com.jinyufeili.minas.sensor.data.DataPoint;
 import com.jinyufeili.minas.sensor.data.DataPointType;
 import com.jinyufeili.minas.sensor.service.DataPointService;
 import com.jinyufeili.minas.wechat.data.AirStatus;
-import me.chanjar.weixin.common.bean.WxMenu;
+import me.chanjar.weixin.common.bean.menu.WxMenu;
+import me.chanjar.weixin.common.bean.menu.WxMenuButton;
 import me.chanjar.weixin.common.exception.WxErrorException;
+import me.chanjar.weixin.mp.api.WxMpMenuService;
 import me.chanjar.weixin.mp.api.WxMpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -31,15 +32,18 @@ import java.util.OptionalDouble;
 @ConditionalOnProperty(value = "cron.weatherMenuUpdate", matchIfMissing = true)
 public class WechatMenuUpdateJob {
 
-    private final Logger LOG = LoggerFactory.getLogger(this.getClass());
-
     public static final int ALLOWED_LAG = 10 * 60 * 1000;
+
+    private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private DataPointService dataPointService;
 
     @Autowired
     private WxMpService wechatService;
+
+    @Autowired
+    private WxMpMenuService wxMpMenuService;
 
     @Scheduled(cron = "59 */4 * * * *")
     public void update() throws WxErrorException {
@@ -60,10 +64,10 @@ public class WechatMenuUpdateJob {
     }
 
     private void updateAirIcon(AirStatus airStatus) throws WxErrorException {
-        WxMenu wxMenu = wechatService.menuGet();
-        for (WxMenu.WxMenuButton button : wxMenu.getButtons()) {
+        WxMenu wxMenu = wxMpMenuService.menuGet();
+        for (WxMenuButton button : wxMenu.getButtons()) {
             if (button.getName().indexOf("PM2.5") != -1) {
-                String buttonName= "PM2.5";
+                String buttonName = "PM2.5";
                 if (airStatus == AirStatus.GOOD) {
                     buttonName += " \uD83D\uDE00";
                 } else if (airStatus == AirStatus.BAD) {
@@ -74,7 +78,7 @@ public class WechatMenuUpdateJob {
             }
         }
 
-        wechatService.menuCreate(wxMenu);
+        wechatService.getMenuService().menuCreate(wxMenu);
         LOG.info("wechat menu updated, status = {}", airStatus);
     }
 }

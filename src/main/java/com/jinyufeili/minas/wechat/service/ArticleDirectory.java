@@ -7,6 +7,7 @@
 package com.jinyufeili.minas.wechat.service;
 
 import me.chanjar.weixin.common.exception.WxErrorException;
+import me.chanjar.weixin.mp.api.WxMpMaterialService;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.WxMpMaterialNews;
 import org.apache.lucene.analysis.Analyzer;
@@ -45,7 +46,7 @@ public class ArticleDirectory {
     private Directory directory;
 
     @Autowired
-    private WxMpService wechatService;
+    private WxMpMaterialService materialService;
 
     @Autowired
     private Analyzer analyzer;
@@ -93,7 +94,7 @@ public class ArticleDirectory {
             String mediaId = doc.get(FIELD_MEDIA_ID);
             WxMpMaterialNews materialNews;
             try {
-                materialNews = wechatService.materialNewsInfo(mediaId);
+                materialNews = materialService.materialNewsInfo(mediaId);
             } catch (WxErrorException e) {
                 throw new RuntimeException(e);
             }

@@ -13,6 +13,7 @@ import com.qiniu.storage.UploadManager;
 import com.qiniu.storage.model.FileInfo;
 import com.qiniu.util.Auth;
 import me.chanjar.weixin.common.exception.WxErrorException;
+import me.chanjar.weixin.mp.api.WxMpMaterialService;
 import me.chanjar.weixin.mp.api.WxMpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -36,13 +36,16 @@ public class MediaHelper {
     private Logger LOG = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    private WxMpService wechatService;
+    private WxMpService wxMpService;
 
     @Autowired
     private Auth qiniuAuth;
 
     @Autowired
     private BucketManager bucketManager;
+
+    @Autowired
+    private WxMpMaterialService materialService;
 
     @Cacheable("mediaUrls")
     public String getMediaUrl(String mediaId) {
@@ -60,8 +63,7 @@ public class MediaHelper {
     }
 
     private FileInfo uploadMedia(String mediaId) throws WxErrorException {
-        InputStream inputStream = wechatService.materialImageOrVoiceDownload(mediaId);
-
+        InputStream inputStream = materialService.materialImageOrVoiceDownload(mediaId);
 
         byte[] bytes;
         try {

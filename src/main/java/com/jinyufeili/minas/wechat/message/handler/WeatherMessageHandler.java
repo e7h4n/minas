@@ -15,7 +15,13 @@ import com.jinyufeili.minas.sensor.data.DataPointType;
 import com.jinyufeili.minas.sensor.service.DataPointService;
 import com.jinyufeili.minas.wechat.data.AqiLevel;
 import com.jinyufeili.minas.wechat.util.AqiUtils;
+import me.chanjar.weixin.common.exception.WxErrorException;
+import me.chanjar.weixin.common.session.WxSessionManager;
+import me.chanjar.weixin.mp.api.WxMpMessageHandler;
+import me.chanjar.weixin.mp.api.WxMpService;
+import me.chanjar.weixin.mp.bean.WxMpCustomMessage;
 import me.chanjar.weixin.mp.bean.WxMpXmlMessage;
+import me.chanjar.weixin.mp.bean.WxMpXmlOutMessage;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,13 +36,13 @@ import java.util.*;
  * @author pw
  */
 @Service
-public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
+public class WeatherMessageHandler implements WxMpMessageHandler {
 
     public static final int ALLOWED_LAG = 10 * 60 * 1000;
 
-    private final Logger LOG = LoggerFactory.getLogger(this.getClass());
-
     private static final String[] HOME_USERS = {"obQ_WwJFoQCEw7RqINOxd7Y_59zI", "obQ_WwBgW__vZwHvHXF_CdW5sIEM"};
+
+    private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private DataPointService dataPointService;
@@ -48,7 +54,10 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
     private UserService userService;
 
     @Override
-    protected String generateTextMessage(WxMpXmlMessage message, Map<String, Object> context) {
+    public WxMpXmlOutMessage handle(WxMpXmlMessage message, Map<String, Object> context, WxMpService wxMpService,
+                                    WxSessionManager sessionManager) throws WxErrorException {
+        String fromUserName = message.getFromUser();
+
         DataPoint temperature = dataPointService.query(DataPointType.TEMPERATURE, 1).get(0);
         DataPoint humidity = dataPointService.query(DataPointType.HUMIDITY, 1).get(0);
         DataPoint pm25 = dataPointService.query(DataPointType.PM25, 1).get(0);
@@ -60,7 +69,7 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
         messages.add(String.format("%s", formatter.format(new Date(temperature.getTimestamp()))));
         messages.add(String.format("温湿度: %.1f℃ / %.1f%%", temperature.getValue(), humidity.getValue()));
 
-        if (ArrayUtils.indexOf(HOME_USERS, message.getFromUserName()) != -1) {
+        if (ArrayUtils.indexOf(HOME_USERS, fromUserName) != -1) {
             messages.add(String.format("气压: %.0fhPa", pressure.getValue() / 100.0));
         }
 
@@ -75,21 +84,21 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
             if (usAqi == null) {
                 messages.add("空气污染指数(美标): 超限");
             } else {
-                messages.add(String.format("空气指数(美标): %.0f - %s", AqiUtils.calcAqiValue(usAqi, average),
-                        usAqi.getName()));
+                messages.add(
+                        String.format("空气指数(美标): %.0f - %s", AqiUtils.calcAqiValue(usAqi, average), usAqi.getName()));
             }
 
             AqiLevel cnAqi = AqiUtils.getAqi(AqiLevel.CN_AQI_LEVELS, average);
             if (usAqi == null) {
                 messages.add("空气污染指数(国标): 超限");
             } else {
-                messages.add(String.format("空气指数(国标): %.0f - %s", AqiUtils.calcAqiValue(cnAqi, average),
-                        cnAqi.getName()));
+                messages.add(
+                        String.format("空气指数(国标): %.0f - %s", AqiUtils.calcAqiValue(cnAqi, average), cnAqi.getName()));
                 messages.add(cnAqi.getDesc());
             }
         }
 
-        if (ArrayUtils.indexOf(HOME_USERS, message.getFromUserName()) != -1) {
+        if (ArrayUtils.indexOf(HOME_USERS, fromUserName) != -1) {
             DataPoint temperatureHome = dataPointService.query(DataPointType.TEMPERATURE_HOME, 1).get(0);
             DataPoint humidityHome = dataPointService.query(DataPointType.HUMIDITY_HOME, 1).get(0);
             DataPoint pm25Home = dataPointService.query(DataPointType.PM25_HOME, 1).get(0);
@@ -113,7 +122,7 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
         }
 
         try {
-            User user = userService.getByOpenId(message.getFromUserName());
+            User user = userService.getByOpenId(fromUserName);
             Optional<String> config = userConfigStorage.get(user.getId(), UserConfigType.PM25_NOTIFICATION);
             if (config.isPresent() && config.get().equals("1")) {
                 messages.add("\n已开启空气变化提醒。发送『关闭空气提醒』可以关闭该功能。");
@@ -122,9 +131,17 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
             }
             LOG.info("return pm25 message for user, userId={}, userName={}", user.getId(), user.getName());
         } catch (EmptyResultDataAccessException e) {
-            LOG.info("guest can't use air notification. wechatOpenId={}", message.getFromUserName());
+            LOG.info("guest can't use air notification. wechatOpenId={}", fromUserName);
         }
 
-        return String.join("\n", messages);
+        String messageContent = String.join("\n", messages);
+        WxMpCustomMessage customMessage = WxMpCustomMessage.TEXT().toUser(fromUserName).content(messageContent).build();
+        try {
+            wxMpService.getKefuService().customMessageSend(customMessage);
+        } catch (WxErrorException e) {
+            LOG.error("error when send weather message", e);
+        }
+
+        return null;
     }
 }

@@ -18,7 +18,7 @@ import java.util.Set;
  */
 public interface ResidentService {
 
-    long GROUP_ID = 100l;
+    long TAG_ID = 100l;
 
     List<Resident> queryByRoomId(int roomId);
 

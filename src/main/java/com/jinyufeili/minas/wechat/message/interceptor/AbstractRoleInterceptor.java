@@ -35,7 +35,7 @@ public abstract class AbstractRoleInterceptor implements WxMpMessageInterceptor 
 
         User user;
         try {
-            user = userService.getByOpenId(wxMessage.getFromUserName());
+            user = userService.getByOpenId(wxMessage.getFromUser());
         } catch (EmptyResultDataAccessException e) {
             return false;
         }

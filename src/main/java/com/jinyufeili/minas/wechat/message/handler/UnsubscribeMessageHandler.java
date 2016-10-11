@@ -36,11 +36,11 @@ public class UnsubscribeMessageHandler implements WxMpMessageHandler {
     @Override
     public WxMpXmlOutMessage handle(WxMpXmlMessage wxMessage, Map<String, Object> context, WxMpService wxMpService,
                                     WxSessionManager sessionManager) throws WxErrorException {
-        LOG.info("Unsubscribe event, fromUser=" + wxMessage.getFromUserName());
+        LOG.info("Unsubscribe event, fromUser=" + wxMessage.getFromUser());
 
         User user;
         try {
-            user = userService.getByOpenId(wxMessage.getFromUserName());
+            user = userService.getByOpenId(wxMessage.getFromUser());
         } catch (EmptyResultDataAccessException e) {
             return null;
         }

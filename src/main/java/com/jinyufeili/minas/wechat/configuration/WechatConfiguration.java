@@ -4,7 +4,7 @@ import com.jinyufeili.minas.wechat.service.WechatMessageRouter;
 import me.chanjar.weixin.mp.api.WxMpConfigStorage;
 import me.chanjar.weixin.mp.api.WxMpInMemoryConfigStorage;
 import me.chanjar.weixin.mp.api.WxMpService;
-import me.chanjar.weixin.mp.api.WxMpServiceImpl;
+import me.chanjar.weixin.mp.api.impl.WxMpServiceImpl;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

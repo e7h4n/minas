@@ -8,12 +8,14 @@ package com.jinyufeili.minas.wechat.message.interceptor;
 
 import me.chanjar.weixin.common.exception.WxErrorException;
 import me.chanjar.weixin.common.session.WxSessionManager;
+import me.chanjar.weixin.mp.api.WxMpMaterialService;
 import me.chanjar.weixin.mp.api.WxMpMessageInterceptor;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.WxMpMaterialNews;
 import me.chanjar.weixin.mp.bean.WxMpXmlMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -25,6 +27,10 @@ import java.util.Map;
 public class MediaMessageInterceptor implements WxMpMessageInterceptor {
 
     private Logger LOG = LoggerFactory.getLogger(this.getClass());
+
+    @Autowired
+    private WxMpMaterialService materialService;
+    
     @Override
     public boolean intercept(WxMpXmlMessage wxMessage, Map<String, Object> context, WxMpService wxMpService,
                              WxSessionManager sessionManager) throws WxErrorException {
@@ -39,7 +45,7 @@ public class MediaMessageInterceptor implements WxMpMessageInterceptor {
         }
 
         String mediaId = split[1];
-        WxMpMaterialNews newsInfo = wxMpService.materialNewsInfo(mediaId);
+        WxMpMaterialNews newsInfo = materialService.materialNewsInfo(mediaId);
         if (newsInfo.isEmpty()) {
             return false;
         }

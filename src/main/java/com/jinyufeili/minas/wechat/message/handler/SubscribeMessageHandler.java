@@ -35,7 +35,7 @@ public class SubscribeMessageHandler extends AbstractTextResponseMessageHandler 
             sb = new StringBuilder("感谢关注翡丽社区");
         }
 
-        String fromUserName = message.getFromUserName();
+        String fromUserName = message.getFromUser();
         try {
             userService.getByOpenId(fromUserName);
         } catch (EmptyResultDataAccessException e) {

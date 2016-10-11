@@ -4,6 +4,7 @@ import com.jinyufeili.minas.info.data.Information;
 import com.jinyufeili.minas.info.service.InformationService;
 import me.chanjar.weixin.common.exception.WxErrorException;
 import me.chanjar.weixin.common.session.WxSessionManager;
+import me.chanjar.weixin.mp.api.WxMpMaterialService;
 import me.chanjar.weixin.mp.api.WxMpMessageInterceptor;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.WxMpMaterialNews;
@@ -31,6 +32,9 @@ public class InformationMessageInterceptor implements WxMpMessageInterceptor {
     @Autowired
     private InformationService informationService;
 
+    @Autowired
+    private WxMpMaterialService wxMpMaterialService;
+
     @Override
     public boolean intercept(WxMpXmlMessage wxMessage, Map<String, Object> context, WxMpService wxMpService,
                              WxSessionManager sessionManager) throws WxErrorException {
@@ -53,7 +57,8 @@ public class InformationMessageInterceptor implements WxMpMessageInterceptor {
         }
 
         String mediaId = split[1];
-        WxMpMaterialNews newsInfo = wxMpService.materialNewsInfo(mediaId);
+        WxMpMaterialNews newsInfo = wxMpMaterialService.materialNewsInfo(mediaId);
+
         if (newsInfo.isEmpty()) {
             return false;
         }
