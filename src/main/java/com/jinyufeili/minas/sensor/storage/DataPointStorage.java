@@ -47,12 +47,15 @@ public class DataPointStorage {
         source.addValue("type", dataPoint.getType().toString());
 
         KeyHolder kh = new GeneratedKeyHolder();
-        db.update("insert into sensor_datapoint" +
-                " set value = :value" +
-                ", time = :time" +
-                ", type = :type", source, kh);
+        db.update("insert into sensor_datapoint set value = :value, time = :time, type = :type" +
+                " on duplicate key update value = :value", source, kh);
 
-        return kh.getKey().intValue();
+        if (kh.getKey() != null) {
+            return kh.getKey().intValue();
+        }
+
+        return db.queryForObject("select id from sensor_datapoint where type = :type and time = :time", source,
+                Integer.class);
     }
 
     public List<DataPoint> query(DataPointType type, int limit) {

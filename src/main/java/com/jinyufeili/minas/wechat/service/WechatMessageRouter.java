@@ -3,6 +3,7 @@ package com.jinyufeili.minas.wechat.service;
 import com.jinyufeili.minas.wechat.message.handler.*;
 import com.jinyufeili.minas.wechat.message.interceptor.InformationMessageInterceptor;
 import me.chanjar.weixin.common.api.WxConsts;
+import me.chanjar.weixin.common.api.WxMessageDuplicateChecker;
 import me.chanjar.weixin.mp.api.WxMpMessageRouter;
 import me.chanjar.weixin.mp.api.WxMpService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,12 @@ public class WechatMessageRouter extends WxMpMessageRouter {
     @Autowired
     public void setExecutorService(ExecutorService executorService) {
         super.setExecutorService(executorService);
+    }
+
+    @Override
+    @Autowired
+    public void setMessageDuplicateChecker(WxMessageDuplicateChecker messageDuplicateChecker) {
+        super.setMessageDuplicateChecker(messageDuplicateChecker);
     }
 
     public WechatMessageRouter(WxMpService wxMpService) {

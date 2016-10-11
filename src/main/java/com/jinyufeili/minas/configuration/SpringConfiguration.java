@@ -28,7 +28,7 @@ public class SpringConfiguration {
         taskExecutor.setThreadGroupName("minas-executor-pool");
         taskExecutor.setThreadNamePrefix("executor-task");
         taskExecutor.setQueueCapacity(25);
-        taskExecutor.setMaxPoolSize(3);
+        taskExecutor.setMaxPoolSize(4);
         return taskExecutor;
     }
 

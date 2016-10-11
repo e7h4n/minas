@@ -17,6 +17,8 @@
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot:1.4.1.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-autoconfigure:1.4.1.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-starter-logging:1.4.1.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: ch.qos.logback:logback-classic:1.1.7" level="project" />
+    <orderEntry type="library" name="Maven: ch.qos.logback:logback-core:1.1.7" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:jcl-over-slf4j:1.7.21" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:jul-to-slf4j:1.7.21" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:log4j-over-slf4j:1.7.21" level="project" />
@@ -103,8 +105,6 @@
     <orderEntry type="library" name="Maven: javax.ws.rs:jsr311-api:1.1.1" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.session:spring-session-jdbc:1.2.1.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.session:spring-session:1.2.1.RELEASE" level="project" />
-    <orderEntry type="library" name="Maven: org.logback-extensions:logback-ext-loggly:0.1.2" level="project" />
-    <orderEntry type="library" name="Maven: ch.qos.logback:logback-classic:1.1.1" level="project" />
-    <orderEntry type="library" name="Maven: ch.qos.logback:logback-core:1.1.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.kevinsawicki:http-request:6.0" level="project" />
   </component>
 </module>

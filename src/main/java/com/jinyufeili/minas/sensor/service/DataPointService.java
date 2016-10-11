@@ -13,10 +13,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -54,12 +56,16 @@ public class DataPointService {
         return dataPointStorage.get(id);
     }
 
-    public DataPoint getLatestDataPoint(DataPointType dataPointType) {
+    public Optional<DataPoint> getLatestDataPoint(DataPointType dataPointType) {
         if (!cache.containsKey(dataPointType)) {
-            DataPoint dataPoint = query(dataPointType, 1).get(0);
+            List<DataPoint> dataPoints = query(dataPointType, 1);
+            if (CollectionUtils.isEmpty(dataPoints)) {
+                return Optional.empty();
+            }
+            DataPoint dataPoint = dataPoints.get(0);
             cache.put(dataPointType, dataPoint);
         }
 
-        return cache.get(dataPointType);
+        return Optional.of(cache.get(dataPointType));
     }
 }

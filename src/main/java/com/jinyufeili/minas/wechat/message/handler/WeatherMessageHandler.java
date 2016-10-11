@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author pw
@@ -32,7 +33,7 @@ import java.util.*;
 @Service
 public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
 
-    public static final int ALLOWED_LAG = 10 * 60 * 1000;
+    public static final long ALLOWED_LAG = TimeUnit.MINUTES.toMillis(10);
 
     private static final String[] HOME_USERS = {"obQ_WwJFoQCEw7RqINOxd7Y_59zI", "obQ_WwBgW__vZwHvHXF_CdW5sIEM"};
 
@@ -51,10 +52,10 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
     protected String generateTextMessage(WxMpXmlMessage message, Map<String, Object> context) {
         String fromUserName = message.getFromUser();
 
-        DataPoint temperature = dataPointService.getLatestDataPoint(DataPointType.TEMPERATURE);
-        DataPoint humidity = dataPointService.getLatestDataPoint(DataPointType.HUMIDITY);
-        DataPoint pm25 = dataPointService.getLatestDataPoint(DataPointType.PM25);
-        DataPoint pressure = dataPointService.getLatestDataPoint(DataPointType.PRESSURE);
+        DataPoint temperature = dataPointService.getLatestDataPoint(DataPointType.TEMPERATURE).get();
+        DataPoint humidity = dataPointService.getLatestDataPoint(DataPointType.HUMIDITY).get();
+        DataPoint pm25 = dataPointService.getLatestDataPoint(DataPointType.PM25).get();
+        DataPoint pressure = dataPointService.getLatestDataPoint(DataPointType.PRESSURE).get();
 
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy年M月d日 H点mm分");
         List<String> messages = new ArrayList<>();
@@ -67,9 +68,11 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
         }
 
         if (System.currentTimeMillis() - pm25.getTimestamp() < ALLOWED_LAG) {
-            double value = pm25.getValue();
-            messages.add(String.format("PM2.5: %.0fug/m^3", value));
+            messages.add(String.format("PM2.5: %.0fug/m^3", pm25.getValue()));
+        }
 
+        if (System.currentTimeMillis() - pm25.getTimestamp() < ALLOWED_LAG) {
+            double value = pm25.getValue();
             AqiLevel usAqi = AqiUtils.getAqi(AqiLevel.US_AQI_LEVELS, value);
             if (usAqi == null) {
                 messages.add("空气污染指数(美标): 超限");
@@ -88,12 +91,21 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
             }
         }
 
+        Optional<DataPoint> pm25Official = dataPointService.getLatestDataPoint(DataPointType.PM25_OFFICIAL);
+        if (pm25Official.isPresent()) {
+            messages.add("\n奥体中心官方数据");
+            messages.add(String.format("更新于%.0f分钟前",
+                    (double) (System.currentTimeMillis() - pm25Official.get().getTimestamp()) /
+                            (double) TimeUnit.MINUTES.toMillis(1)));
+            messages.add(String.format("PM2.5: %.0fug/m^3", pm25Official.get().getValue()));
+        }
+
         if (ArrayUtils.indexOf(HOME_USERS, fromUserName) != -1) {
-            DataPoint temperatureHome = dataPointService.getLatestDataPoint(DataPointType.TEMPERATURE_HOME);
-            DataPoint humidityHome = dataPointService.getLatestDataPoint(DataPointType.HUMIDITY_HOME);
-            DataPoint pm25Home = dataPointService.getLatestDataPoint(DataPointType.PM25_HOME);
-            DataPoint formaldehydeHome = dataPointService.getLatestDataPoint(DataPointType.FORMALDEHYDE_HOME);
-            DataPoint co2Home = dataPointService.getLatestDataPoint(DataPointType.CO2_HOME);
+            DataPoint temperatureHome = dataPointService.getLatestDataPoint(DataPointType.TEMPERATURE_HOME).get();
+            DataPoint humidityHome = dataPointService.getLatestDataPoint(DataPointType.HUMIDITY_HOME).get();
+            DataPoint pm25Home = dataPointService.getLatestDataPoint(DataPointType.PM25_HOME).get();
+            DataPoint formaldehydeHome = dataPointService.getLatestDataPoint(DataPointType.FORMALDEHYDE_HOME).get();
+            DataPoint co2Home = dataPointService.getLatestDataPoint(DataPointType.CO2_HOME).get();
 
             messages.add("\n家里");
             messages.add(String.format("温湿度: %.1f℃ / %.1f%%", temperatureHome.getValue(), humidityHome.getValue()));
