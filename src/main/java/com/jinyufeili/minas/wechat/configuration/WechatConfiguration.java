@@ -1,9 +1,7 @@
 package com.jinyufeili.minas.wechat.configuration;
 
 import com.jinyufeili.minas.wechat.service.WechatMessageRouter;
-import me.chanjar.weixin.mp.api.WxMpConfigStorage;
-import me.chanjar.weixin.mp.api.WxMpInMemoryConfigStorage;
-import me.chanjar.weixin.mp.api.WxMpService;
+import me.chanjar.weixin.mp.api.*;
 import me.chanjar.weixin.mp.api.impl.WxMpServiceImpl;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -26,6 +24,31 @@ public class WechatConfiguration {
         WxMpServiceImpl service = new WxMpServiceImpl();
         service.setWxMpConfigStorage(configStorage);
         return service;
+    }
+
+    @Bean
+    public WxMpKefuService wxMpKefuService(WxMpService wxMpService) {
+        return wxMpService.getKefuService();
+    }
+
+    @Bean
+    public WxMpUserService wxMpUserService(WxMpService wxMpService) {
+        return wxMpService.getUserService();
+    }
+
+    @Bean
+    public WxMpUserTagService wxMpUserTagService(WxMpService wxMpService) {
+        return wxMpService.getUserTagService();
+    }
+
+    @Bean
+    public WxMpMaterialService wxMpMaterialService(WxMpService wxMpService) {
+        return wxMpService.getMaterialService();
+    }
+
+    @Bean
+    public WxMpMenuService wxMpMenuService(WxMpService wxMpService) {
+        return wxMpService.getMenuService();
     }
 
     @Bean

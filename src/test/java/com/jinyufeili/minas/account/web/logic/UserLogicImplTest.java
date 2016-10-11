@@ -18,7 +18,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.internal.exceptions.ExceptionIncludingMockitoWarnings;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,9 +39,9 @@ public class UserLogicImplTest {
 
     public static final String NEW_RESIDENT_MOBILE_PHONE = "1231";
 
-    private static final int NEW_RESIDENT_USER_ID = 4;
-
     public static final int UNBINDED_USER_ID = 999;
+
+    private static final int NEW_RESIDENT_USER_ID = 4;
 
     private Logger LOG = LoggerFactory.getLogger(this.getClass());
 
