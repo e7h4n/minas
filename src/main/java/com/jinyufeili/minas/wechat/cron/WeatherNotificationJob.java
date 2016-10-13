@@ -121,7 +121,12 @@ public class WeatherNotificationJob {
         String time = sdfDate.format(now);
         String advice = flag ? "\uD83D\uDE37 小区空气有点脏，请注意关窗净化。" : "\uD83D\uDE00 小区空气很好，可以开窗透气。";
         AqiLevel aqi = AqiUtils.getAqi(AqiLevel.US_AQI_LEVELS, averageValue);
-        String remark = String.format("当前浓度：%dug/m^3\n美标评级：%s", Math.round(averageValue), aqi.getName());
+        String durationTip = flag ? "好空气一共持续了%.0f小时，生活不易，期待下一次好天气早点来" : "雾霾一共持续了%.0f小时，抓紧时间，享受清新空气😄";
+        double durationHours = (double) Math.abs(System.currentTimeMillis() - latestDataPoint.getTimestamp()) /
+                TimeUnit.MINUTES.toMillis(1);
+        durationTip = String.format(durationTip, durationHours);
+        String remark =
+                String.format("当前浓度：%dug/m^3\n美标评级：%s\n\n%s", Math.round(averageValue), aqi.getName(), durationTip);
 
         userIds.forEach(id -> {
             User user = userService.get(id);
