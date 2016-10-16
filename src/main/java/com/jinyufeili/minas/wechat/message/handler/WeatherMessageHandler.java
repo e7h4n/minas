@@ -57,9 +57,10 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
         DataPoint pm25 = dataPointService.getLatestDataPoint(DataPointType.PM25).get();
         DataPoint pressure = dataPointService.getLatestDataPoint(DataPointType.PRESSURE).get();
 
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy年M月d日 H点mm分");
+        SimpleDateFormat formatter = new SimpleDateFormat("小区户外 (H点mm分)");
         List<String> messages = new ArrayList<>();
 
+        Math.max(temperature.getTimestamp(), pm25.getTimestamp());
         messages.add(String.format("%s", formatter.format(new Date(temperature.getTimestamp()))));
         messages.add(String.format("温湿度: %.1f℃ / %.1f%%", temperature.getValue(), humidity.getValue()));
 
@@ -93,8 +94,7 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
 
         Optional<DataPoint> pm25Official = dataPointService.getLatestDataPoint(DataPointType.PM25_OFFICIAL);
         if (pm25Official.isPresent()) {
-            messages.add("\n奥体中心官方数据");
-            messages.add(String.format("更新于%.0f分钟前",
+            messages.add(String.format("\n奥体中心 (%.0f分钟前)",
                     (double) (System.currentTimeMillis() - pm25Official.get().getTimestamp()) /
                             (double) TimeUnit.MINUTES.toMillis(1)));
             messages.add(String.format("PM2.5: %.0fug/m^3", pm25Official.get().getValue()));
