@@ -131,6 +131,7 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
             } else {
                 messages.add("\n发送『打开空气提醒』可以打开空气提醒功能。空气变化早知道，及时关窗更健康。");
             }
+            messages.add("\n试用新版翡丽社区空气台请点击 https://m.jinyufeili.com/#/sensor-station");
             LOG.info("return pm25 message for user, userId={}, userName={}", user.getId(), user.getName());
         } catch (EmptyResultDataAccessException e) {
             LOG.info("guest can't use air notification. wechatOpenId={}", fromUserName);

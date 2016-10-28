@@ -29,6 +29,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -116,17 +117,21 @@ public class WeatherNotificationJob {
 
         List<Integer> userIds = userConfigStorage.queryAllNot(UserConfigType.PM25_NOTIFICATION, "-1");
 
-        SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat sdfDate = new SimpleDateFormat("HH:mm:ss");
         Date now = new Date(latestDataPoint.getTimestamp());
         String time = sdfDate.format(now);
-        String advice = flag ? "\uD83D\uDE37 小区空气有点脏，请注意关窗净化。" : "\uD83D\uDE00 小区空气很好，可以开窗透气。";
+        String advice = flag ? "小区空气有点脏，请注意关窗净化。" : "小区空气很好，可以开窗透气。";
         AqiLevel aqi = AqiUtils.getAqi(AqiLevel.US_AQI_LEVELS, averageValue);
-        String durationTip = flag ? "好空气一共持续了%d小时，生活不易，期待下一次好天气早点来" : "雾霾一共持续了%d小时，抓紧时间，享受清新空气😄";
-        int durationHours = (int) Math.round((double) Math.abs(System.currentTimeMillis() - latestDataPoint.getTimestamp()) /
-                TimeUnit.HOURS.toMillis(1));
-        durationTip = String.format(durationTip, durationHours);
-        String remark =
-                String.format("当前浓度：%dug/m^3\n美标评级：%s\n\n%s", Math.round(averageValue), aqi.getName(), durationTip);
+
+        StringBuilder remarkBuilder = new StringBuilder(
+                String.format("最近10分钟浓度均值：%dug/m^3\n美标评级：%s", Math.round(averageValue), aqi.getName()));
+
+        remarkBuilder.append("\n");
+        remarkBuilder.append("\n最近 5 次数据:");
+        averagePoints.forEach(p -> {
+            remarkBuilder
+                    .append(String.format("\n%s %.0fug/m^3", sdfDate.format(new Date(p.getTimestamp())), p.getValue()));
+        });
 
         userIds.forEach(id -> {
             User user = userService.get(id);
@@ -138,7 +143,7 @@ public class WeatherNotificationJob {
             message.getData().add(new WxMpTemplateData("first", advice));
             message.getData().add(new WxMpTemplateData("keyword1", "二区户外"));
             message.getData().add(new WxMpTemplateData("keyword2", time));
-            message.getData().add(new WxMpTemplateData("remark", remark));
+            message.getData().add(new WxMpTemplateData("remark", remarkBuilder.toString()));
 
             try {
                 wxMpService.templateSend(message);
