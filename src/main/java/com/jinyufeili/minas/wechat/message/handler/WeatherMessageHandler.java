@@ -16,7 +16,6 @@ import com.jinyufeili.minas.sensor.service.DataPointService;
 import com.jinyufeili.minas.wechat.data.AqiLevel;
 import com.jinyufeili.minas.wechat.util.AqiUtils;
 import me.chanjar.weixin.mp.bean.WxMpXmlMessage;
-import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +33,6 @@ import java.util.concurrent.TimeUnit;
 public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
 
     public static final long ALLOWED_LAG = TimeUnit.MINUTES.toMillis(10);
-
-    private static final String[] HOME_USERS = {"obQ_WwJFoQCEw7RqINOxd7Y_59zI", "obQ_WwBgW__vZwHvHXF_CdW5sIEM"};
 
     private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
@@ -55,7 +52,6 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
         DataPoint temperature = dataPointService.getLatestDataPoint(DataPointType.TEMPERATURE).get();
         DataPoint humidity = dataPointService.getLatestDataPoint(DataPointType.HUMIDITY).get();
         DataPoint pm25 = dataPointService.getLatestDataPoint(DataPointType.PM25).get();
-        DataPoint pressure = dataPointService.getLatestDataPoint(DataPointType.PRESSURE).get();
 
         SimpleDateFormat formatter = new SimpleDateFormat("小区户外 (H点mm分)");
         List<String> messages = new ArrayList<>();
@@ -63,10 +59,6 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
         Math.max(temperature.getTimestamp(), pm25.getTimestamp());
         messages.add(String.format("%s", formatter.format(new Date(temperature.getTimestamp()))));
         messages.add(String.format("温湿度: %.1f℃ / %.1f%%", temperature.getValue(), humidity.getValue()));
-
-        if (ArrayUtils.indexOf(HOME_USERS, fromUserName) != -1) {
-            messages.add(String.format("气压: %.0fhPa", pressure.getValue() / 100.0));
-        }
 
         if (System.currentTimeMillis() - pm25.getTimestamp() < ALLOWED_LAG) {
             messages.add(String.format("PM2.5: %.0fug/m^3", pm25.getValue()));
@@ -98,29 +90,6 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
                     (double) (System.currentTimeMillis() - pm25Official.get().getTimestamp()) /
                             (double) TimeUnit.MINUTES.toMillis(1)));
             messages.add(String.format("PM2.5: %.0fug/m^3", pm25Official.get().getValue()));
-        }
-
-        if (ArrayUtils.indexOf(HOME_USERS, fromUserName) != -1) {
-            DataPoint temperatureHome = dataPointService.getLatestDataPoint(DataPointType.TEMPERATURE_HOME).get();
-            DataPoint humidityHome = dataPointService.getLatestDataPoint(DataPointType.HUMIDITY_HOME).get();
-            DataPoint pm25Home = dataPointService.getLatestDataPoint(DataPointType.PM25_HOME).get();
-            DataPoint formaldehydeHome = dataPointService.getLatestDataPoint(DataPointType.FORMALDEHYDE_HOME).get();
-            DataPoint co2Home = dataPointService.getLatestDataPoint(DataPointType.CO2_HOME).get();
-
-            messages.add("\n家里");
-            messages.add(String.format("温湿度: %.1f℃ / %.1f%%", temperatureHome.getValue(), humidityHome.getValue()));
-
-            if (System.currentTimeMillis() - pm25Home.getTimestamp() < ALLOWED_LAG) {
-                messages.add(String.format("PM2.5: %.0fug/m^3", pm25Home.getValue()));
-            }
-
-            if (System.currentTimeMillis() - formaldehydeHome.getTimestamp() < ALLOWED_LAG) {
-                messages.add(String.format("甲醛: %.3fmg/m^3", formaldehydeHome.getValue() / 1000.0));
-            }
-
-            if (System.currentTimeMillis() - co2Home.getTimestamp() < ALLOWED_LAG) {
-                messages.add(String.format("CO2: %.0f ppm", co2Home.getValue()));
-            }
         }
 
         try {

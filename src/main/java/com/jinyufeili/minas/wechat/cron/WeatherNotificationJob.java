@@ -99,7 +99,7 @@ public class WeatherNotificationJob {
             return;
         }
 
-        List<DataPoint> averagePoints = dataPointService.query(DataPointType.PM25, 5);
+        List<DataPoint> averagePoints = dataPointService.query(DataPointType.PM25, 30);
         double averageValue = averagePoints.stream().mapToDouble(DataPoint::getValue).average().getAsDouble();
         boolean flag = averageValue > THRESHOLD;
         if (notificationOpt.isPresent()) {
@@ -124,7 +124,7 @@ public class WeatherNotificationJob {
         AqiLevel aqi = AqiUtils.getAqi(AqiLevel.US_AQI_LEVELS, averageValue);
 
         StringBuilder remarkBuilder = new StringBuilder(
-                String.format("最近10分钟浓度均值：%dug/m^3\n美标评级：%s", Math.round(averageValue), aqi.getName()));
+                String.format("一小时浓度均值：%dug/m^3\n美标评级：%s", Math.round(averageValue), aqi.getName()));
 
         remarkBuilder.append("\n");
         remarkBuilder.append("\n最近 5 次数据:");
