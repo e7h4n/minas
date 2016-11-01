@@ -65,4 +65,18 @@ public class DataPointController {
         DataPointType type = DataPointType.valueOf(strType);
         return dataPointLogic.query(type, limit);
     }
+
+    @RequestMapping("/api/sensor/data-points/{type}/latest")
+    public DataPoint getLatest(@PathVariable("type") String strType, Authentication authentication) {
+        if (strType.contains("_HOME")) {
+            UserVO userVO = userLogic.getByAuthentication(authentication);
+            if (userVO.getRoom() == null || userVO.getRoom().getRegion() != 2 || userVO.getRoom().getBuilding() != 1 ||
+                    userVO.getRoom().getUnit() != 2 || userVO.getRoom().getHouseNumber() != 601) {
+                throw new ForbiddenException();
+            }
+        }
+
+        DataPointType type = DataPointType.valueOf(strType);
+        return dataPointLogic.getLatest(type);
+    }
 }

@@ -9,12 +9,14 @@ package com.jinyufeili.minas.sensor.web.logic;
 import com.jinyufeili.minas.sensor.data.DataPoint;
 import com.jinyufeili.minas.sensor.data.DataPointType;
 import com.jinyufeili.minas.sensor.service.DataPointService;
+import com.jinyufeili.minas.web.exception.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -46,5 +48,14 @@ public class DataPointLogic {
 
     public List<DataPoint> query(DataPointType type, int limit) {
         return dataPointService.query(type, limit);
+    }
+
+    public DataPoint getLatest(DataPointType type) {
+        Optional<DataPoint> latestDataPoint = dataPointService.getLatestDataPoint(type);
+        if (!latestDataPoint.isPresent()) {
+            throw new NotFoundException();
+        }
+
+        return latestDataPoint.get();
     }
 }

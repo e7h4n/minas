@@ -14,11 +14,7 @@
             timeToLiveSeconds="600"
             memoryStoreEvictionPolicy="LRU"/>
 
-    <cache name="materialNews"
-           timeToIdleSeconds="600"
-    />
-
     <cache name="mediaUrls"
-           timeToIdleSeconds="1800"
+           timeToLiveSeconds="3600"
     />
 </ehcache>

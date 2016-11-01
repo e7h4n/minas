@@ -12,14 +12,13 @@ import com.jinyufeili.minas.sensor.storage.DataPointStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author pw
@@ -32,20 +31,9 @@ public class DataPointService {
     @Autowired
     private DataPointStorage dataPointStorage;
 
-    private Map<DataPointType, DataPoint> cache = new ConcurrentHashMap<>();
-
-    @PostConstruct
-    public void initCache() {
-        for (DataPointType dataPointType : DataPointType.values()) {
-            LOG.info("init cache for {}", dataPointType);
-            getLatestDataPoint(dataPointType);
-        }
-    }
-
+    @CacheEvict(value = "latestDataPoint", key = "#dataPoint.type")
     public int create(DataPoint dataPoint) {
-        int id = dataPointStorage.create(dataPoint);
-        cache.put(dataPoint.getType(), dataPoint);
-        return id;
+        return dataPointStorage.create(dataPoint);
     }
 
     public List<DataPoint> query(DataPointType type, int limit) {
@@ -56,16 +44,14 @@ public class DataPointService {
         return dataPointStorage.get(id);
     }
 
+    @Cacheable(value = "latestDataPoint")
     public Optional<DataPoint> getLatestDataPoint(DataPointType dataPointType) {
-        if (!cache.containsKey(dataPointType)) {
-            List<DataPoint> dataPoints = query(dataPointType, 1);
-            if (CollectionUtils.isEmpty(dataPoints)) {
-                return Optional.empty();
-            }
-            DataPoint dataPoint = dataPoints.get(0);
-            cache.put(dataPointType, dataPoint);
+        List<DataPoint> dataPoints = query(dataPointType, 1);
+        if (CollectionUtils.isEmpty(dataPoints)) {
+            return Optional.empty();
         }
+        DataPoint dataPoint = dataPoints.get(0);
 
-        return Optional.of(cache.get(dataPointType));
+        return Optional.of(dataPoint);
     }
 }
