@@ -73,13 +73,6 @@ public class WeatherNotificationJob {
     @Scheduled(cron = "0 */10 * * * *")
     public void update() {
 
-        Calendar calendar = new GregorianCalendar();
-        int hour = calendar.get(Calendar.HOUR_OF_DAY);
-        if (hour < MIN_HOUR || hour >= MAX_HOUR) {
-            LOG.info("silent when night");
-            return;
-        }
-
         List<DataPoint> dataPoints = dataPointService.query(DataPointType.PM25, 1);
         if (dataPoints.size() == 0) {
             LOG.info("no data points found");
@@ -115,48 +108,53 @@ public class WeatherNotificationJob {
             }
         }
 
-        List<Integer> userIds = userConfigStorage.queryAllNot(UserConfigType.PM25_NOTIFICATION, "-1");
+        Calendar calendar = new GregorianCalendar();
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        if (hour >= MIN_HOUR && hour < MAX_HOUR) {
+            List<Integer> userIds = userConfigStorage.queryAllNot(UserConfigType.PM25_NOTIFICATION, "-1");
 
-        SimpleDateFormat sdfDate = new SimpleDateFormat("HH:mm:ss");
-        Date now = new Date(latestDataPoint.getTimestamp());
-        String time = sdfDate.format(now);
-        String advice = flag ? "小区空气有点脏，请注意关窗净化。" : "小区空气很好，可以开窗透气。";
-        AqiLevel aqi = AqiUtils.getAqi(AqiLevel.US_AQI_LEVELS, averageValue);
+            SimpleDateFormat sdfDate = new SimpleDateFormat("HH:mm");
+            Date now = new Date(latestDataPoint.getTimestamp());
+            String time = sdfDate.format(now);
+            String advice = flag ? "小区空气有点脏，请注意关窗净化。" : "小区空气很好，可以开窗透气。";
+            AqiLevel aqi = AqiUtils.getAqi(AqiLevel.US_AQI_LEVELS, averageValue);
 
-        StringBuilder remarkBuilder = new StringBuilder(
-                String.format("一小时浓度均值：%dug/m^3\n美标评级：%s", Math.round(averageValue), aqi.getName()));
+            StringBuilder remarkBuilder = new StringBuilder(
+                    String.format("一小时浓度均值：%dug/m^3\n美标评级：%s", Math.round(averageValue), aqi.getName()));
 
-        remarkBuilder.append("\n");
-        remarkBuilder.append("\n最近 5 次数据:");
-        averagePoints.forEach(p -> {
-            remarkBuilder
-                    .append(String.format("\n%s %.0fug/m^3", sdfDate.format(new Date(p.getTimestamp())), p.getValue()));
-        });
+            remarkBuilder.append("\n");
+            remarkBuilder.append("\n最近数据:");
+            averagePoints.forEach(p -> {
+                remarkBuilder.append(String.format("\n%s %.0fug/m^3", sdfDate.format(new Date(p.getTimestamp())), p.getValue()));
+            });
 
-        userIds.forEach(id -> {
-            User user = userService.get(id);
-            user.getOpenId();
+            userIds.forEach(id -> {
+                User user = userService.get(id);
+                user.getOpenId();
 
-            WxMpTemplateMessage message = new WxMpTemplateMessage();
-            message.setToUser(user.getOpenId());
-            message.setTemplateId("8ttt8oMgKhALmtE349yjEFMHUtJUNGY-XFngPxG6z6s");
-            message.getData().add(new WxMpTemplateData("first", advice));
-            message.getData().add(new WxMpTemplateData("keyword1", "二区户外"));
-            message.getData().add(new WxMpTemplateData("keyword2", time));
-            message.getData().add(new WxMpTemplateData("remark", remarkBuilder.toString()));
+                WxMpTemplateMessage message = new WxMpTemplateMessage();
+                message.setToUser(user.getOpenId());
+                message.setTemplateId("8ttt8oMgKhALmtE349yjEFMHUtJUNGY-XFngPxG6z6s");
+                message.getData().add(new WxMpTemplateData("first", advice));
+                message.getData().add(new WxMpTemplateData("keyword1", "二区户外"));
+                message.getData().add(new WxMpTemplateData("keyword2", time));
+                message.getData().add(new WxMpTemplateData("remark", remarkBuilder.toString()));
 
-            try {
-                wxMpService.templateSend(message);
-            } catch (WxErrorException e) {
-                LOG.error("", e);
-            }
-        });
+                try {
+                    wxMpService.templateSend(message);
+                } catch (WxErrorException e) {
+                    LOG.error("", e);
+                }
+            });
+
+            LOG.info("air notification sent to {} users", userIds.size());
+        } else {
+            LOG.info("silent when night");
+        }
 
         Notification notification = new Notification();
         notification.setType(NotificationType.PM25);
         notification.setFlag(flag);
         this.notificationStorage.add(notification);
-
-        LOG.info("air notification sent to {} users", userIds.size());
     }
 }
