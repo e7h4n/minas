@@ -36,14 +36,6 @@ public class DataPointService {
         return dataPointStorage.create(dataPoint);
     }
 
-    public List<DataPoint> query(DataPointType type, int limit) {
-        return dataPointStorage.query(type, limit);
-    }
-
-    public DataPoint get(int id) {
-        return dataPointStorage.get(id);
-    }
-
     @Cacheable(value = "latestDataPoint")
     public Optional<DataPoint> getLatestDataPoint(DataPointType dataPointType) {
         List<DataPoint> dataPoints = query(dataPointType, 1);
@@ -53,5 +45,13 @@ public class DataPointService {
         DataPoint dataPoint = dataPoints.get(0);
 
         return Optional.of(dataPoint);
+    }
+
+    public List<DataPoint> query(DataPointType type, int limit) {
+        return dataPointStorage.query(type, limit);
+    }
+
+    public DataPoint get(int id) {
+        return dataPointStorage.get(id);
     }
 }

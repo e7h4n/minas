@@ -14,7 +14,4 @@
             timeToLiveSeconds="600"
             memoryStoreEvictionPolicy="LRU"/>
 
-    <cache name="mediaUrls"
-           timeToLiveSeconds="3600"
-    />
 </ehcache>
