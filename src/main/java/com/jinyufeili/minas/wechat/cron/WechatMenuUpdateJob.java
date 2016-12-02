@@ -10,6 +10,7 @@ import com.jinyufeili.minas.sensor.data.DataPoint;
 import com.jinyufeili.minas.sensor.data.DataPointType;
 import com.jinyufeili.minas.sensor.service.DataPointService;
 import com.jinyufeili.minas.wechat.data.AirStatus;
+import me.chanjar.weixin.common.api.WxConsts;
 import me.chanjar.weixin.common.bean.menu.WxMenu;
 import me.chanjar.weixin.common.bean.menu.WxMenuButton;
 import me.chanjar.weixin.common.exception.WxErrorException;
@@ -22,6 +23,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.OptionalDouble;
 
@@ -64,19 +66,59 @@ public class WechatMenuUpdateJob {
     }
 
     private void updateAirIcon(AirStatus airStatus) throws WxErrorException {
-        WxMenu wxMenu = wxMpMenuService.menuGet();
-        for (WxMenuButton button : wxMenu.getButtons()) {
-            if (button.getName().indexOf("PM2.5") != -1) {
-                String buttonName = "PM2.5";
-                if (airStatus == AirStatus.GOOD) {
-                    buttonName += " \uD83D\uDE00";
-                } else if (airStatus == AirStatus.BAD) {
-                    buttonName += " \uD83D\uDE37";
-                }
+        List<WxMenuButton> buttons = new ArrayList<>();
 
-                button.setName(buttonName);
-            }
+        WxMenuButton airButton = new WxMenuButton();
+        String buttonName = "PM2.5";
+        if (airStatus == AirStatus.GOOD) {
+            buttonName += " \uD83D\uDE00";
+        } else if (airStatus == AirStatus.BAD) {
+            buttonName += " \uD83D\uDE37";
         }
+        airButton.setName(buttonName);
+        airButton.setType(WxConsts.BUTTON_CLICK);
+        airButton.setKey("WEATHER");
+        buttons.add(airButton);
+
+        WxMenuButton homeButton = new WxMenuButton();
+        homeButton.setType(WxConsts.BUTTON_VIEW);
+        homeButton.setUrl("https://m.jinyufeili.com/");
+        homeButton.setName("我的社区");
+        buttons.add(homeButton);
+
+        WxMenuButton infoButton = new WxMenuButton();
+        infoButton.setName("生活信息");
+        buttons.add(infoButton);
+
+        List<WxMenuButton> infoSubButtons = new ArrayList<>();
+        infoButton.setSubButtons(infoSubButtons);
+
+        WxMenuButton kdButton = new WxMenuButton();
+        kdButton.setName("快递电话 \uD83D\uDE9A");
+        kdButton.setType(WxConsts.BUTTON_CLICK);
+        kdButton.setKey("INFO_KD");
+        infoSubButtons.add(kdButton);
+
+        WxMenuButton bbButton = new WxMenuButton();
+        bbButton.setName("宝宝办证 \uD83D\uDC76");
+        bbButton.setType(WxConsts.BUTTON_CLICK);
+        bbButton.setKey("MEDIA_cQjH8feoqx4PKadkwOl39ICypLofVp45swILpLXxxmQ");
+        infoSubButtons.add(bbButton);
+
+        WxMenuButton yyButton = new WxMenuButton();
+        yyButton.setName("医院信息 \uD83C\uDFE5");
+        yyButton.setType(WxConsts.BUTTON_CLICK);
+        yyButton.setKey("MEDIA_cQjH8feoqx4PKadkwOl39Hnh5I9RbVtPXTp6z3Y0J64");
+        infoSubButtons.add(yyButton);
+
+        WxMenuButton dhButton = new WxMenuButton();
+        dhButton.setName("常用电话 \uD83D\uDCDE");
+        dhButton.setType(WxConsts.BUTTON_CLICK);
+        dhButton.setKey("MEDIA_cQjH8feoqx4PKadkwOl39IrMX7HhuSc9J17Imd76tNU");
+        infoSubButtons.add(dhButton);
+        
+        WxMenu wxMenu = new WxMenu();
+        wxMenu.setButtons(buttons);
 
         wechatService.getMenuService().menuCreate(wxMenu);
         LOG.info("wechat menu updated, status = {}", airStatus);
