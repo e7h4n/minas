@@ -49,7 +49,6 @@ public class DataPointService {
         return Optional.of(dataPoint);
     }
 
-    @Cacheable(value = "dataPointList")
     public List<DataPoint> query(DataPointType type, StatisticsType statisticsType, int limit) {
         return dataPointStorage.query(type, statisticsType, limit);
     }
@@ -58,13 +57,11 @@ public class DataPointService {
         return dataPointStorage.get(id);
     }
 
-    @Cacheable(value = "dataPointRange")
     public List<DataPoint> query(DataPointType type, StatisticsType statisticsType, long startTimeInclusive,
                                  long endTimeExclusive) {
         return dataPointStorage.query(type, statisticsType, startTimeInclusive, endTimeExclusive);
     }
 
-    @CacheEvict(cacheNames = {"dataPointList", "dataPointRange"}, allEntries = true)
     public int create(DataPoint dataPoint) {
         return dataPointStorage.create(dataPoint);
     }

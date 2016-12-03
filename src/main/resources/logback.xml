@@ -1,10 +1,3 @@
 <configuration>
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
-
-    <logger name="net.sf.ehcache" level="ALL" />
-    
-    <root level="INFO">
-        <appender-ref ref="CONSOLE" />
-        <appender-ref ref="FILE" />
-    </root>
 </configuration>
