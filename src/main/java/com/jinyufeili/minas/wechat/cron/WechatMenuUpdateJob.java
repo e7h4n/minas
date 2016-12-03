@@ -8,6 +8,7 @@ package com.jinyufeili.minas.wechat.cron;
 
 import com.jinyufeili.minas.sensor.data.DataPoint;
 import com.jinyufeili.minas.sensor.data.DataPointType;
+import com.jinyufeili.minas.sensor.data.StatisticsType;
 import com.jinyufeili.minas.sensor.service.DataPointService;
 import com.jinyufeili.minas.wechat.data.AirStatus;
 import me.chanjar.weixin.common.api.WxConsts;
@@ -49,13 +50,13 @@ public class WechatMenuUpdateJob {
 
     @Scheduled(cron = "59 */4 * * * *")
     public void update() throws WxErrorException {
-        DataPoint dataPoint = dataPointService.query(DataPointType.PM25, 1).get(0);
+        DataPoint dataPoint = dataPointService.query(DataPointType.PM25, StatisticsType.MOMENTARY, 1).get(0);
         if (System.currentTimeMillis() - dataPoint.getTimestamp() > ALLOWED_LAG) {
             LOG.info("latest data point timestamp = {}", dataPoint.getTimestamp());
             return;
         }
 
-        List<DataPoint> dataPoints = dataPointService.query(DataPointType.PM25, 5);
+        List<DataPoint> dataPoints = dataPointService.query(DataPointType.PM25, StatisticsType.MOMENTARY, 5);
         OptionalDouble optionalDouble = dataPoints.stream().mapToDouble(DataPoint::getValue).average();
         if (!optionalDouble.isPresent()) {
             updateAirIcon(AirStatus.NONE);
@@ -116,7 +117,7 @@ public class WechatMenuUpdateJob {
         dhButton.setType(WxConsts.BUTTON_CLICK);
         dhButton.setKey("MEDIA_cQjH8feoqx4PKadkwOl39IrMX7HhuSc9J17Imd76tNU");
         infoSubButtons.add(dhButton);
-        
+
         WxMenu wxMenu = new WxMenu();
         wxMenu.setButtons(buttons);
 

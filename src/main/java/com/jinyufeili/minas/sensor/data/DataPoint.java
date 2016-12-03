@@ -19,6 +19,8 @@ public class DataPoint {
 
     private DataPointType type;
 
+    private StatisticsType statisticsType;
+
     public int getId() {
         return id;
     }
@@ -49,5 +51,13 @@ public class DataPoint {
 
     public void setType(DataPointType type) {
         this.type = type;
+    }
+
+    public StatisticsType getStatisticsType() {
+        return statisticsType;
+    }
+
+    public void setStatisticsType(StatisticsType statisticsType) {
+        this.statisticsType = statisticsType;
     }
 }

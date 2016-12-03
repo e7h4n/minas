@@ -8,6 +8,7 @@ package com.jinyufeili.minas.sensor.service;
 
 import com.jinyufeili.minas.sensor.data.DataPoint;
 import com.jinyufeili.minas.sensor.data.DataPointType;
+import com.jinyufeili.minas.sensor.data.StatisticsType;
 import com.jinyufeili.minas.sensor.storage.DataPointStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,13 +33,14 @@ public class DataPointService {
     private DataPointStorage dataPointStorage;
 
     @CacheEvict(value = "latestDataPoint", key = "#dataPoint.type")
-    public int create(DataPoint dataPoint) {
-        return dataPointStorage.create(dataPoint);
+    public int createMomentary(DataPoint dataPoint) {
+        dataPoint.setStatisticsType(StatisticsType.MOMENTARY);
+        return create(dataPoint);
     }
 
     @Cacheable(value = "latestDataPoint")
-    public Optional<DataPoint> getLatestDataPoint(DataPointType dataPointType) {
-        List<DataPoint> dataPoints = query(dataPointType, 1);
+    public Optional<DataPoint> getLatestMomentaryDataPoint(DataPointType dataPointType) {
+        List<DataPoint> dataPoints = query(dataPointType, StatisticsType.MOMENTARY, 1);
         if (CollectionUtils.isEmpty(dataPoints)) {
             return Optional.empty();
         }
@@ -47,11 +49,23 @@ public class DataPointService {
         return Optional.of(dataPoint);
     }
 
-    public List<DataPoint> query(DataPointType type, int limit) {
-        return dataPointStorage.query(type, limit);
+    @Cacheable(value = "dataPointList")
+    public List<DataPoint> query(DataPointType type, StatisticsType statisticsType, int limit) {
+        return dataPointStorage.query(type, statisticsType, limit);
     }
 
     public DataPoint get(int id) {
         return dataPointStorage.get(id);
+    }
+
+    @Cacheable(value = "dataPointRange")
+    public List<DataPoint> query(DataPointType type, StatisticsType statisticsType, long startTimeInclusive,
+                                 long endTimeExclusive) {
+        return dataPointStorage.query(type, statisticsType, startTimeInclusive, endTimeExclusive);
+    }
+
+    @CacheEvict(cacheNames = {"dataPointList", "dataPointRange"}, allEntries = true)
+    public int create(DataPoint dataPoint) {
+        return dataPointStorage.create(dataPoint);
     }
 }

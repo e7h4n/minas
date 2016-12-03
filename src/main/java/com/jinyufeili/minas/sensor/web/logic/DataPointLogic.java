@@ -8,6 +8,7 @@ package com.jinyufeili.minas.sensor.web.logic;
 
 import com.jinyufeili.minas.sensor.data.DataPoint;
 import com.jinyufeili.minas.sensor.data.DataPointType;
+import com.jinyufeili.minas.sensor.data.StatisticsType;
 import com.jinyufeili.minas.sensor.service.DataPointService;
 import com.jinyufeili.minas.web.exception.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,20 +43,24 @@ public class DataPointLogic {
             dataPoints.add(dataPoint);
         }
 
-        return dataPoints.stream().map(dataPointService::create).map(dataPointService::get)
+        return dataPoints.stream().map(dataPointService::createMomentary).map(dataPointService::get)
                 .collect(Collectors.toList());
     }
 
-    public List<DataPoint> query(DataPointType type, int limit) {
-        return dataPointService.query(type, limit);
+    public List<DataPoint> query(DataPointType type, StatisticsType statisticsType, int limit) {
+        return dataPointService.query(type, statisticsType, limit);
     }
 
     public DataPoint getLatest(DataPointType type) {
-        Optional<DataPoint> latestDataPoint = dataPointService.getLatestDataPoint(type);
+        Optional<DataPoint> latestDataPoint = dataPointService.getLatestMomentaryDataPoint(type);
         if (!latestDataPoint.isPresent()) {
             throw new NotFoundException();
         }
 
         return latestDataPoint.get();
+    }
+
+    public List<DataPoint> query(DataPointType type, StatisticsType statisticsType, long startTime, long endTime) {
+        return dataPointService.query(type, statisticsType, startTime, endTime);
     }
 }

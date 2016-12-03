@@ -72,6 +72,10 @@ public class UserLogicImpl implements UserLogic {
 
     @Override
     public UserVO getByAuthentication(Authentication authentication) {
+        if (authentication == null) {
+            throw new UnauthorizedException();
+        }
+
         User user;
         try {
             user = userService.getByOpenId(authentication.getName());

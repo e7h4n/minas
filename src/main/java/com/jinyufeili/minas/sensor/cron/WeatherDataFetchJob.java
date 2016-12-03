@@ -83,8 +83,8 @@ public class WeatherDataFetchJob {
         dataPoint.setValue(pm25);
         dataPoint.setTimestamp(date.getTime());
         dataPoint.setType(DataPointType.PM25_OFFICIAL);
-        dataPointService.create(dataPoint);
+        dataPointService.createMomentary(dataPoint);
 
-        LOG.info("create pm25 offical data, value={}, time={}", pm25, date);
+        LOG.info("createMomentary pm25 offical data, value={}, time={}", pm25, date);
     }
 }

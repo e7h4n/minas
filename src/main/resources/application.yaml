@@ -1,8 +1,11 @@
 spring.datasource:
   url:
   username:
-  testOnBorrow: true
-  validationQuery: SELECT 1
+  tomcat:
+    maxActive: 10
+    maxWait: 5
+    initialSize: 2
+    validationQuery: SELECT 1
 
 security:
   key:

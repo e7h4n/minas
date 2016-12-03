@@ -8,6 +8,9 @@ package com.jinyufeili.minas.sensor.storage;
 
 import com.jinyufeili.minas.sensor.data.DataPoint;
 import com.jinyufeili.minas.sensor.data.DataPointType;
+import com.jinyufeili.minas.sensor.data.StatisticsType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -26,6 +29,8 @@ import java.util.List;
 @Repository
 public class DataPointStorage {
 
+    private Logger LOG = LoggerFactory.getLogger(this.getClass());
+
     private static final RowMapper<DataPoint> ROW_MAPPER = ((rs, rowNum) -> {
         DataPoint dataPoint = new DataPoint();
 
@@ -33,6 +38,7 @@ public class DataPointStorage {
         dataPoint.setValue(rs.getDouble("value"));
         dataPoint.setTimestamp(rs.getTimestamp("time").getTime());
         dataPoint.setType(DataPointType.valueOf(rs.getString("type")));
+        dataPoint.setStatisticsType(StatisticsType.valueOf(rs.getString("statisticsType")));
 
         return dataPoint;
     });
@@ -45,29 +51,57 @@ public class DataPointStorage {
         source.addValue("value", dataPoint.getValue());
         source.addValue("time", new Date(dataPoint.getTimestamp()));
         source.addValue("type", dataPoint.getType().toString());
+        source.addValue("statisticsType", dataPoint.getStatisticsType().toString());
 
         KeyHolder kh = new GeneratedKeyHolder();
-        db.update("insert into sensor_datapoint set value = :value, time = :time, type = :type" +
-                " on duplicate key update value = :value", source, kh);
+        db.update("INSERT INTO sensor_datapoint" +
+                " SET value = :value" +
+                ", time = :time" +
+                ", type = :type" +
+                ", statisticsType = :statisticsType" +
+                " ON DUPLICATE KEY UPDATE value = :value", source, kh);
 
-        if (kh.getKey() != null) {
+        // when ON DUPLICATE KEY UPDATE update a row, there will be two generated key to cause kh.getKey() error
+        if (kh.getKeyList().size() <= 1 && kh.getKey() != null) {
             return kh.getKey().intValue();
         }
 
-        return db.queryForObject("select id from sensor_datapoint where type = :type and time = :time", source,
+        return db.queryForObject("SELECT id FROM sensor_datapoint" +
+                        " WHERE type = :type" +
+                        " AND time = :time" +
+                        " AND statisticsType = :statisticsType", source,
                 Integer.class);
     }
 
-    public List<DataPoint> query(DataPointType type, int limit) {
+    public List<DataPoint> query(DataPointType type, StatisticsType statisticsType, int limit) {
         MapSqlParameterSource source = new MapSqlParameterSource();
         source.addValue("type", type.toString());
         source.addValue("limit", limit);
-        return db.query("select * from sensor_datapoint where type = :type order by time desc limit :limit", source,
-                ROW_MAPPER);
+        source.addValue("statisticsType", statisticsType.toString());
+
+        return db.query("SELECT * FROM sensor_datapoint" +
+                " WHERE type = :type" +
+                " AND statisticsType = :statisticsType" +
+                " ORDER BY time DESC LIMIT :limit", source, ROW_MAPPER);
     }
 
     public DataPoint get(int id) {
-        return db.queryForObject("select * from sensor_datapoint where id = :id", Collections.singletonMap("id", id),
+        return db.queryForObject("SELECT * FROM sensor_datapoint WHERE id = :id", Collections.singletonMap("id", id),
                 ROW_MAPPER);
+    }
+
+    public List<DataPoint> query(DataPointType type, StatisticsType statisticsType, long startTimeInclusive,
+                                 long endTimeExclusive) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("type", type.toString());
+        params.addValue("statisticsType", statisticsType.toString());
+        params.addValue("startTime", new Date(startTimeInclusive));
+        params.addValue("endTime", new Date(endTimeExclusive));
+
+        return db.query("SELECT * FROM sensor_datapoint" +
+                " WHERE type = :type" +
+                " AND statisticsType = :statisticsType" +
+                " AND time >= :startTime" +
+                " AND time < :endTime", params, ROW_MAPPER);
     }
 }

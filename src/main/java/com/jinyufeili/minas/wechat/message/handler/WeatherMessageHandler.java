@@ -49,9 +49,9 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
     protected String generateTextMessage(WxMpXmlMessage message, Map<String, Object> context) {
         String fromUserName = message.getFromUser();
 
-        DataPoint temperature = dataPointService.getLatestDataPoint(DataPointType.TEMPERATURE).get();
-        DataPoint humidity = dataPointService.getLatestDataPoint(DataPointType.HUMIDITY).get();
-        DataPoint pm25 = dataPointService.getLatestDataPoint(DataPointType.PM25).get();
+        DataPoint temperature = dataPointService.getLatestMomentaryDataPoint(DataPointType.TEMPERATURE).get();
+        DataPoint humidity = dataPointService.getLatestMomentaryDataPoint(DataPointType.HUMIDITY).get();
+        DataPoint pm25 = dataPointService.getLatestMomentaryDataPoint(DataPointType.PM25).get();
 
         SimpleDateFormat formatter = new SimpleDateFormat("小区户外 (H点mm分)");
         List<String> messages = new ArrayList<>();
@@ -84,7 +84,7 @@ public class WeatherMessageHandler extends AbstractTextResponseMessageHandler {
             }
         }
 
-        Optional<DataPoint> pm25Official = dataPointService.getLatestDataPoint(DataPointType.PM25_OFFICIAL);
+        Optional<DataPoint> pm25Official = dataPointService.getLatestMomentaryDataPoint(DataPointType.PM25_OFFICIAL);
         if (pm25Official.isPresent()) {
             messages.add(String.format("\n奥体中心 (%.0f分钟前)",
                     (double) (System.currentTimeMillis() - pm25Official.get().getTimestamp()) /

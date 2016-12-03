@@ -10,6 +10,7 @@ import com.jinyufeili.minas.account.web.data.UserVO;
 import com.jinyufeili.minas.account.web.logic.UserLogic;
 import com.jinyufeili.minas.sensor.data.DataPoint;
 import com.jinyufeili.minas.sensor.data.DataPointType;
+import com.jinyufeili.minas.sensor.data.StatisticsType;
 import com.jinyufeili.minas.sensor.web.logic.DataPointLogic;
 import com.jinyufeili.minas.web.exception.BadRequestException;
 import com.jinyufeili.minas.web.exception.ForbiddenException;
@@ -51,7 +52,11 @@ public class DataPointController {
     }
 
     @RequestMapping("/api/sensor/data-points/{type}")
-    public List<DataPoint> query(@PathVariable("type") String strType, @RequestParam(defaultValue = "10") int limit,
+    public List<DataPoint> query(@PathVariable("type") String strType,
+                                 @RequestParam(defaultValue = "-1") int limit,
+                                 @RequestParam(defaultValue = "-1") long startTime,
+                                 @RequestParam(defaultValue = "-1") long endTime,
+                                 @RequestParam(name = "statisticsType", defaultValue = "MOMENTARY") String strStatisticsType,
                                  Authentication authentication) {
 
         if (strType.contains("_HOME")) {
@@ -62,8 +67,18 @@ public class DataPointController {
             }
         }
 
+        StatisticsType statisticsType = StatisticsType.valueOf(strStatisticsType);
         DataPointType type = DataPointType.valueOf(strType);
-        return dataPointLogic.query(type, limit);
+
+        if (limit == -1 && (startTime == -1 || endTime == -1)) {
+            throw new BadRequestException("provide limit or startTime and endTime");
+        }
+
+        if (limit != -1) {
+            return dataPointLogic.query(type, statisticsType, limit);
+        }
+
+        return dataPointLogic.query(type, statisticsType, startTime, endTime);
     }
 
     @RequestMapping("/api/sensor/data-points/{type}/latest")

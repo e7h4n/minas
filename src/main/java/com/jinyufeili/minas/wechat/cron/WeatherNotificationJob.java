@@ -10,10 +10,7 @@ import com.jinyufeili.minas.account.data.User;
 import com.jinyufeili.minas.account.service.UserService;
 import com.jinyufeili.minas.crm.data.UserConfigType;
 import com.jinyufeili.minas.crm.storage.UserConfigStorage;
-import com.jinyufeili.minas.sensor.data.DataPoint;
-import com.jinyufeili.minas.sensor.data.DataPointType;
-import com.jinyufeili.minas.sensor.data.Notification;
-import com.jinyufeili.minas.sensor.data.NotificationType;
+import com.jinyufeili.minas.sensor.data.*;
 import com.jinyufeili.minas.sensor.service.DataPointService;
 import com.jinyufeili.minas.sensor.storage.NotificationStorage;
 import com.jinyufeili.minas.wechat.data.AqiLevel;
@@ -29,7 +26,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -73,7 +69,7 @@ public class WeatherNotificationJob {
     @Scheduled(cron = "0 */10 * * * *")
     public void update() {
 
-        List<DataPoint> dataPoints = dataPointService.query(DataPointType.PM25, 1);
+        List<DataPoint> dataPoints = dataPointService.query(DataPointType.PM25, StatisticsType.MOMENTARY, 1);
         if (dataPoints.size() == 0) {
             LOG.info("no data points found");
             return;
@@ -92,7 +88,7 @@ public class WeatherNotificationJob {
             return;
         }
 
-        List<DataPoint> averagePoints = dataPointService.query(DataPointType.PM25, 30);
+        List<DataPoint> averagePoints = dataPointService.query(DataPointType.PM25, StatisticsType.MOMENTARY, 30);
         double averageValue = averagePoints.stream().mapToDouble(DataPoint::getValue).average().getAsDouble();
         boolean flag = averageValue > THRESHOLD;
         if (notificationOpt.isPresent()) {
@@ -125,7 +121,8 @@ public class WeatherNotificationJob {
             remarkBuilder.append("\n");
             remarkBuilder.append("\n最近数据:");
             averagePoints.forEach(p -> {
-                remarkBuilder.append(String.format("\n%s %.0fug/m^3", sdfDate.format(new Date(p.getTimestamp())), p.getValue()));
+                remarkBuilder.append(
+                        String.format("\n%s %.0fug/m^3", sdfDate.format(new Date(p.getTimestamp())), p.getValue()));
             });
 
             userIds.forEach(id -> {
