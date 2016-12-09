@@ -28,6 +28,13 @@ public class SensorDataStatisticsJob {
     @Autowired
     private DataPointService dataPointService;
 
+    private final static DataPointType[] AVG_DATAPOINT_TYPES = {
+        DataPointType.PM25,
+        DataPointType.PM25_HOME,
+        DataPointType.PM25_OFFICIAL,
+        DataPointType.CO2_HOME
+    };
+
     @Scheduled(cron = "0 * * * * *")
     public void run() {
         Calendar startTimeCalendar = Calendar.getInstance();
@@ -37,7 +44,7 @@ public class SensorDataStatisticsJob {
         long startTime = startTimeCalendar.getTimeInMillis();
         long endTime = startTime + TimeUnit.HOURS.toMillis(1);
 
-        for (DataPointType type : DataPointType.values()) {
+        for (DataPointType type : AVG_DATAPOINT_TYPES) {
             List<DataPoint> dataPoints = dataPointService.query(type, StatisticsType.MOMENTARY, startTime, endTime);
             OptionalDouble avgOpt = dataPoints.stream().mapToDouble(DataPoint::getValue).average();
             if (!avgOpt.isPresent()) {
