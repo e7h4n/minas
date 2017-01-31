@@ -4,18 +4,24 @@ import com.jinyufeili.minas.account.data.User;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * Created by pw on 6/10/16.
  */
 public class UserStorageTest {
+
+    private Logger LOG = LoggerFactory.getLogger(this.getClass());
 
     public static final String USER_NAME = "foo";
 
@@ -29,12 +35,14 @@ public class UserStorageTest {
 
     private UserStorage storage;
 
+    private NamedParameterJdbcTemplate db;
+
     @Before
     public void setUp() throws Exception {
         DataSource ds = new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.H2).setName(
                 "testdb;mode=MySQL").setScriptEncoding("UTF-8").addDefaultScripts().ignoreFailedDrops(true).build();
 
-        NamedParameterJdbcTemplate db = new NamedParameterJdbcTemplate(ds);
+        db = new NamedParameterJdbcTemplate(ds);
         storage = new UserStorage();
 
         Field field = storage.getClass().getDeclaredField("db");
@@ -111,6 +119,41 @@ public class UserStorageTest {
         User userB = storage.get(userBId);
         Assert.assertNotEquals(newName, userB.getName());
         Assert.assertNotEquals(newAccessToken, userB.getAccessToken());
+    }
+
+    @Test
+    public void remove() throws Exception {
+        int userAId = createUser();
+        int userBId = createUserB();
+        int userCId = createUser();
+
+        storage.remove(userAId);
+        storage.remove(userCId);
+
+        LOG.info("userAId: {}", userAId);
+        LOG.info("userBId: {}", userBId);
+        User user = storage.get(userBId);
+        Assert.assertEquals("bar", user.getName());
+
+        Integer residentA = db.queryForObject("select wechat_user_id from crm_resident where id = 1", Collections.emptyMap(), Integer.class);
+        Assert.assertNull(residentA);
+
+        Integer residentB = db.queryForObject("select wechat_user_id from crm_resident where id = 2", Collections.emptyMap(), Integer.class);
+        Assert.assertEquals(userBId, residentB.intValue());
+
+        try {
+            storage.get(userAId);
+            Assert.assertFalse(true);
+        } catch (EmptyResultDataAccessException e) {
+            Assert.assertTrue(true);
+        }
+
+        try {
+            storage.get(userCId);
+            Assert.assertFalse(true);
+        } catch (EmptyResultDataAccessException e) {
+            Assert.assertTrue(true);
+        }
     }
 
     private int createUserB() {

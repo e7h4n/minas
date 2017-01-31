@@ -29,4 +29,6 @@ public interface UserLogic {
     List<UserVO> queryUser(int groupId);
 
     UserVO updateCurrentUser(UserVO user, String verifyCode);
+
+    void remove(int userId);
 }

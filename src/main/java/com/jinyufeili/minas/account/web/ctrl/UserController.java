@@ -46,6 +46,13 @@ public class UserController {
         return userLogic.queryFreeUser();
     }
 
+    @RequestMapping(value = "/api/users/{userId}", method = RequestMethod.DELETE)
+    @PreAuthorize("hasRole('筹备组')")
+    public void removeUser(@PathVariable int userId) {
+        userLogic.remove(userId);
+    }
+
+
     @RequestMapping("/api/users/{userId}")
     public UserVO get(@PathVariable int userId, Authentication authentication, HttpServletRequest request) {
         if (userId != userLogic.getByAuthentication(authentication).getId() && !request.isUserInRole("筹备组")) {

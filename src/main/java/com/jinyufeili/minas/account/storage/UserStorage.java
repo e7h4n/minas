@@ -1,6 +1,8 @@
 package com.jinyufeili.minas.account.storage;
 
 import com.jinyufeili.minas.account.data.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -22,6 +24,8 @@ import java.util.stream.Collectors;
  */
 @Repository
 public class UserStorage {
+
+    private Logger LOG = LoggerFactory.getLogger(this.getClass());
 
     private static final RowMapper<AuthUser> ROW_MAPPER = (rs, i) -> {
         AuthUser authUser = new AuthUser();
@@ -182,9 +186,14 @@ public class UserStorage {
 
     @Transactional
     public boolean remove(int userId) {
+        LOG.info("remove user {}", userId);
+
         int authUserId = db.queryForObject(
                 "select u.id from auth_user u join wechat_wechatuser wu on wu.user_id = u.id where wu.id = :userId",
                 Collections.singletonMap("userId", userId), Integer.class);
+
+        db.update("update crm_resident set wechat_user_id = NULL where wechat_user_id = :userId", Collections.singletonMap("userId", userId));
+        db.update("delete from crm_user_config where userId = :userId", Collections.singletonMap("userId", userId));
         db.update("delete from wechat_wechatuser where id = :userId", Collections.singletonMap("userId", userId));
         db.update("delete from auth_user_groups where user_id = :authUserId", Collections.singletonMap("authUserId", authUserId));
         db.update("delete from auth_user where id = :authUserId", Collections.singletonMap("authUserId", authUserId));
