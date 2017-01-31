@@ -54,6 +54,7 @@ public class WechatLogic {
             user.setExpiredTime(System.currentTimeMillis() + accessToken.getExpiresIn() * 1000);
             user.setName(wechatUser.getNickname());
             user.setOpenId(wechatUser.getOpenId());
+            user.setAvatarId(wechatUser.getHeadImgUrl());
             int userId = userService.create(user);
             user = userService.get(userId);
         }
