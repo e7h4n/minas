@@ -40,6 +40,7 @@ public class UserStorage {
         wechatUser.setRefreshToken(rs.getString("refresh_token"));
         wechatUser.setExpiredTime(rs.getDate("expire_at").getTime());
         wechatUser.setUserId(rs.getInt("user_id"));
+        wechatUser.setAvatarId(rs.getString("avatarId"));
         return wechatUser;
     };
 
@@ -80,6 +81,7 @@ public class UserStorage {
         params.addValue("openId", user.getOpenId());
         params.addValue("accessToken", user.getAccessToken());
         params.addValue("refreshToken", user.getRefreshToken());
+        params.addValue("avatarId", user.getAvatarId());
 
         params.addValue("_username", user.getName() + System.currentTimeMillis());
         SecureRandom random = new SecureRandom();
@@ -105,7 +107,8 @@ public class UserStorage {
                 ", access_token = :accessToken" +
                 ", refresh_token = :refreshToken" +
                 ", expire_at = :expiredTime" +
-                ", user_id = :userId", params, kh);
+                ", user_id = :userId" +
+                ", avatarId = :avatarId", params, kh);
 
         return kh.getKey().intValue();
     }
@@ -118,6 +121,7 @@ public class UserStorage {
         params.addValue("accessToken", user.getAccessToken());
         params.addValue("refreshToken", user.getRefreshToken());
         params.addValue("id", user.getId());
+        params.addValue("avatarId", user.getAvatarId());
 
         WechatUser wechatUser =
                 db.queryForObject("SELECT * FROM wechat_wechatuser WHERE id = :id", params, WECHAT_ROW_MAPPER);
@@ -128,7 +132,9 @@ public class UserStorage {
                 " SET openId = :openId" +
                 ", access_token = :accessToken" +
                 ", refresh_token = :refreshToken" +
-                ", expire_at = :expiredTime WHERE id = :id", params) > 0;
+                ", expire_at = :expiredTime" +
+                ", avatarId = :avatarId" +
+                " WHERE id = :id", params) > 0;
 
         return success;
     }
@@ -201,6 +207,7 @@ public class UserStorage {
         user.setCreatedTime(authUser.getCreatedTime());
         user.setOpenId(wechatUser.getOpenId());
         user.setName(authUser.getUsername());
+        user.setAvatarId(wechatUser.getAvatarId());
         return user;
     }
 
@@ -251,6 +258,8 @@ public class UserStorage {
 
         private int userId;
 
+        private String avatarId;
+
         public int getId() {
             return id;
         }
@@ -297,6 +306,14 @@ public class UserStorage {
 
         public void setUserId(int userId) {
             this.userId = userId;
+        }
+
+        public String getAvatarId() {
+            return avatarId;
+        }
+
+        public void setAvatarId(String avatarId) {
+            this.avatarId = avatarId;
         }
     }
 }

@@ -92,16 +92,30 @@ public class WechatUserInfoUpdateJob {
                     return;
                 }
 
+                boolean updated = false;
                 if (StringUtils.isNotBlank(wxMpUser.getNickname())) {
                     if (!user.getName().equals(wxMpUser.getNickname())) {
                         LOG.info("update user, openId={}, oldName={}, newName={}", user.getOpenId(), user.getName(),
                                 wxMpUser.getNickname());
                         user.setName(wxMpUser.getNickname());
-                        try {
-                            userService.update(user);
-                        } catch (RuntimeException e) {
-                            LOG.error("", e);
-                        }
+                        updated = true;
+                    }
+                }
+
+                if (StringUtils.isNotBlank(wxMpUser.getHeadImgUrl())) {
+                    if (!user.getAvatarId().equals(wxMpUser.getHeadImgUrl())) {
+                        LOG.info("update user, openId={}, oldAvatarId={}, newAvatarId={}", user.getOpenId(), user.getAvatarId(),
+                                wxMpUser.getHeadImgUrl());
+                        user.setAvatarId(wxMpUser.getHeadImgUrl());
+                        updated = true;
+                    }
+                }
+
+                if (updated) {
+                    try {
+                        userService.update(user);
+                    } catch (RuntimeException e) {
+                        LOG.error("", e);
                     }
                 }
             }

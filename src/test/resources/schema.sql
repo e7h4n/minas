@@ -232,6 +232,7 @@ CREATE TABLE `wechat_wechatuser` (
   `refresh_token` varchar(255) NOT NULL,
   `expire_at` datetime NOT NULL,
   `user_id` int(11) NOT NULL,
+  `avatarId` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`),
   KEY `wechat_wechatuser_e1be6330` (`openId`),

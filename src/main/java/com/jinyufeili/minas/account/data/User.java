@@ -15,6 +15,8 @@ public class User {
 
     private String refreshToken;
 
+    private String avatarId;
+
     private long expiredTime;
 
     private long createdTime;
@@ -73,5 +75,13 @@ public class User {
 
     public void setCreatedTime(long createdTime) {
         this.createdTime = createdTime;
+    }
+
+    public String getAvatarId() {
+        return avatarId;
+    }
+
+    public void setAvatarId(String avatarId) {
+        this.avatarId = avatarId;
     }
 }
