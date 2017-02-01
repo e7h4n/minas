@@ -77,8 +77,10 @@ public class WechatMenuUpdateJob {
             buttonName += " \uD83D\uDE37";
         }
         airButton.setName(buttonName);
-        airButton.setType(WxConsts.BUTTON_CLICK);
-        airButton.setKey("WEATHER");
+//        airButton.setType(WxConsts.BUTTON_CLICK);
+//        airButton.setKey("WEATHER");
+        airButton.setType(WxConsts.BUTTON_VIEW);
+        airButton.setUrl("https://m.jinyufeili.com/#/sensor-station");
         buttons.add(airButton);
 
         WxMenuButton homeButton = new WxMenuButton();
