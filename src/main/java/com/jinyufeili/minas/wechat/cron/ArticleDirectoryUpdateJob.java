@@ -6,6 +6,7 @@
  */
 package com.jinyufeili.minas.wechat.cron;
 
+import com.jinyufeili.minas.wechat.data.ArticleDocument;
 import com.jinyufeili.minas.wechat.service.ArticleDirectory;
 import me.chanjar.weixin.common.exception.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpMaterialService;
@@ -32,13 +33,17 @@ import java.util.List;
 @ConditionalOnProperty(value = "cron.articleDirectoryUpdate", matchIfMissing = true)
 public class ArticleDirectoryUpdateJob {
 
+    private final WxMpMaterialService materialService;
+
+    private final IndexWriter indexWriter;
+
     private Logger LOG = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    private IndexWriter indexWriter;
-
-    @Autowired
-    private WxMpMaterialService materialService;
+    public ArticleDirectoryUpdateJob(WxMpMaterialService materialService, IndexWriter indexWriter) {
+        this.materialService = materialService;
+        this.indexWriter = indexWriter;
+    }
 
     @Scheduled(cron = "0 */10 * * * *")
     public void updateDirectory() throws WxErrorException, IOException {
@@ -55,13 +60,17 @@ public class ArticleDirectoryUpdateJob {
                         continue;
                     }
 
+                    String key = String.format("%s_%d", materialNews.getMediaId(), j);
                     Document doc = new Document();
-                    doc.add(new IntField(ArticleDirectory.FIELD_INDEX, j, Field.Store.YES));
-                    doc.add(new StringField(ArticleDirectory.FIELD_MEDIA_ID, materialNews.getMediaId(),
+                    doc.add(new StringField(ArticleDocument.FIELD_ID, key, Field.Store.NO));
+                    doc.add(new StoredField(ArticleDocument.FIELD_INDEX, j));
+                    doc.add(new StringField(ArticleDocument.FIELD_MEDIA_ID, materialNews.getMediaId(),
                             Field.Store.YES));
-                    doc.add(new TextField(ArticleDirectory.FIELD_CONTENT, article.getContent(), Field.Store.YES));
-                    indexWriter
-                            .updateDocument(new Term("id", String.format("%s_%d", materialNews.getMediaId(), j)), doc);
+                    doc.add(new TextField(ArticleDocument.FIELD_CONTENT, article.getContent(), Field.Store.NO));
+
+                    Term keyTerm = new Term(ArticleDocument.FIELD_ID, key);
+                    indexWriter.deleteDocuments(keyTerm);
+                    indexWriter.addDocument(doc);
                     LOG.info("add doc, mediaId={}, index={}", materialNews.getMediaId(), j);
                 }
             }

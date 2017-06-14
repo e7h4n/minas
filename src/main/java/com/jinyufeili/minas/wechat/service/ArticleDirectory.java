@@ -6,6 +6,7 @@
  */
 package com.jinyufeili.minas.wechat.service;
 
+import com.jinyufeili.minas.wechat.data.ArticleDocument;
 import me.chanjar.weixin.common.exception.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpMaterialService;
 import me.chanjar.weixin.mp.api.WxMpService;
@@ -36,22 +37,21 @@ import java.util.*;
 @Service
 public class ArticleDirectory {
 
-    public static final String FIELD_INDEX = "index";
 
-    public static final String FIELD_MEDIA_ID = "mediaId";
+    private final Directory directory;
 
-    public static final String FIELD_CONTENT = "content";
+    private final WxMpMaterialService materialService;
 
-    @Autowired
-    private Directory directory;
-
-    @Autowired
-    private WxMpMaterialService materialService;
-
-    @Autowired
-    private Analyzer analyzer;
+    private final Analyzer analyzer;
 
     private Logger LOG = LoggerFactory.getLogger(this.getClass());
+
+    @Autowired
+    public ArticleDirectory(Directory directory, WxMpMaterialService materialService, Analyzer analyzer) {
+        this.directory = directory;
+        this.materialService = materialService;
+        this.analyzer = analyzer;
+    }
 
     public List<WxMpMaterialNews.WxMpMaterialNewsArticle> search(String messageContent) {
         IndexReader indexReader;
@@ -61,8 +61,8 @@ public class ArticleDirectory {
             throw new RuntimeException(e);
         }
 
-        QueryParser queryParser = new AnalyzingQueryParser(FIELD_CONTENT, analyzer);
-        queryParser.setDefaultOperator(QueryParser.Operator.AND);
+        QueryParser queryParser = new AnalyzingQueryParser(ArticleDocument.FIELD_CONTENT, analyzer);
+        queryParser.setDefaultOperator(QueryParser.Operator.OR);
 
         IndexSearcher searcher = new IndexSearcher(indexReader);
         Query query;
@@ -91,15 +91,16 @@ public class ArticleDirectory {
                 throw new RuntimeException(e);
             }
 
-            String mediaId = doc.get(FIELD_MEDIA_ID);
+            String mediaId = doc.get(ArticleDocument.FIELD_MEDIA_ID);
             WxMpMaterialNews materialNews;
             try {
                 materialNews = materialService.materialNewsInfo(mediaId);
             } catch (WxErrorException e) {
                 throw new RuntimeException(e);
             }
+
             WxMpMaterialNews.WxMpMaterialNewsArticle article =
-                    materialNews.getArticles().get(Integer.valueOf(doc.get(FIELD_INDEX)));
+                    materialNews.getArticles().get(Integer.valueOf(doc.get(ArticleDocument.FIELD_INDEX)));
             if (!urlSet.contains(article.getUrl())) {
                 urlSet.add(article.getUrl());
                 articles.add(article);

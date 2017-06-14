@@ -7,14 +7,11 @@
 package com.jinyufeili.minas.wechat.configuration;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.cn.smart.SmartChineseAnalyzer;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.NIOFSDirectory;
-import org.lionsoul.jcseg.analyzer.v5x.JcsegAnalyzer5X;
-import org.lionsoul.jcseg.tokenizer.core.ADictionary;
-import org.lionsoul.jcseg.tokenizer.core.DictionaryFactory;
-import org.lionsoul.jcseg.tokenizer.core.JcsegTaskConfig;
+import org.apache.lucene.store.MMapDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,8 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.FileSystems;
 import java.nio.file.Path;
 
 /**
@@ -36,47 +31,27 @@ public class LuceneConfiguration {
     @Value("${lucene.directory}")
     private String luceneDirectory;
 
-    @Value("${jcseg.lexiconPath}")
-    private String lexiconPath;
-
     private Logger LOG = LoggerFactory.getLogger(this.getClass());
 
     @Bean
     public Directory directory() throws IOException {
-        Path path = FileSystems.getDefault().getPath(luceneDirectory);
-        return new NIOFSDirectory(path);
-    }
+        File file = new File(luceneDirectory);
+        Path path = file.toPath();
 
-    @Bean
-    public JcsegTaskConfig taskConfig() {
-        return new JcsegTaskConfig();
-    }
-
-    @Bean
-    public ADictionary aDictionary(JcsegTaskConfig taskConfig) throws IOException {
-        ADictionary dictionary = DictionaryFactory.createDefaultDictionary(taskConfig, false);
-        if (lexiconPath.startsWith("classpath:")) {
-            String resourcePath = lexiconPath.replace("classpath:", "");
-            dictionary.load(getResourceAsStream(resourcePath));
-        } else if (lexiconPath.startsWith("file:")) {
-            String pathname = lexiconPath.replace("file:", "");
-            dictionary.load(new File(pathname));
+        try {
+            return new MMapDirectory(path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-
-        return dictionary;
     }
 
     @Bean
-    public Analyzer analyzer(JcsegTaskConfig config, ADictionary dictionary) throws IOException {
-        return new JcsegAnalyzer5X(JcsegTaskConfig.COMPLEX_MODE, config, dictionary);
+    public Analyzer analyzer() {
+        return new SmartChineseAnalyzer();
     }
 
     @Bean
     public IndexWriter indexWriter(Directory directory, Analyzer analyzer) throws IOException {
         return new IndexWriter(directory, new IndexWriterConfig(analyzer));
-    }
-
-    private InputStream getResourceAsStream(String lexicon) {
-        return this.getClass().getClassLoader().getResourceAsStream(lexicon);
     }
 }
