@@ -7,7 +7,6 @@
 package com.jinyufeili.minas.wechat.cron;
 
 import com.jinyufeili.minas.wechat.data.ArticleDocument;
-import com.jinyufeili.minas.wechat.service.ArticleDirectory;
 import me.chanjar.weixin.common.exception.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpMaterialService;
 import me.chanjar.weixin.mp.bean.WxMpMaterialNews;
